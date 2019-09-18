@@ -1,33 +1,16 @@
 # -*- coding: utf-8 -*-
 # encoding=utf-8
 
-from __future__ import division
-
-import codecs
 import os
-import re
-import random
-import shutil
-import socket
-import string
-import sys
-import threading
-import time
-import hashlib
 import traceback
-import dataset
-import requests
-import json
-
 from kivy import Config
-from kivy.modules import inspector
-from kivy.uix.boxlayout import BoxLayout
-
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.dropdown import DropDown
 from kivy.uix.screenmanager import Screen, ScreenManager, SwapTransition
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
+from kivy.uix.button import Button
 
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 Config.set('graphics', 'multisamples', '0')
@@ -37,6 +20,9 @@ Builder.load_string("""
 #:include kv/newpublicationscreen.kv
 #:include kv/addauthor.kv
 
+#:import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
+#:import MDDatePicker   kivymd.uix.picker.MDDatePicker
+
     """)
 
 
@@ -44,10 +30,74 @@ class AddAuthorScreen(Screen):
     def __init__(self, **kwargs):
         super(AddAuthorScreen, self).__init__(**kwargs)
 
+        self.custom_author_title = self.ids["custom_author_title"]
+        self.custom_affiliation = self.ids["custom_affiliation"]
+        self.main_button_title = self.ids["main_button_title"]
+        self.main_button_affiliation = self.ids["main_button_affiliation"]
+
+        # Authors
+        self.menu_for_author_titles = ["Mr", "Ms", "Mrs", "Dr"]
+        self.instance_menu_author_titles = None
+        self.menu_for_at = []
+
+        # Affiliations
+        self.menu_for_affiliations = ["Namibia University of Science and Technology", "University of Namibia",
+                                      "International University of Management"]
+        self.instance_menu_affiliations = None
+        self.menu_for_af = []
+
+    def set_menu_for_author_titles(self):
+        # reset menu_for_author_titles and get from db
+        if len(self.menu_for_author_titles) < 1:
+            return
+        self.menu_for_at = []
+        for name_item in self.menu_for_author_titles:
+            self.menu_for_at.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": lambda x=name_item: self.chosen_author_title(x),
+                }
+            )
+
+    def chosen_author_title(self, x):
+        toast(x)
+        self.main_button_title.text = x
+        self.instance_menu_author_titles.dismiss()
+
+    def set_menu_for_affiliations(self):
+        # reset menu_for_author_titles and get from db
+        if len(self.menu_for_affiliations) < 1:
+            return
+        self.menu_for_af = []
+        for name_item in self.menu_for_affiliations:
+            self.menu_for_af.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": lambda x=name_item: self.chosen_affiliation(x),
+                }
+            )
+
+    def chosen_affiliation(self, x):
+        toast(x)
+        self.instance_menu_affiliations.dismiss()
+        self.main_button_affiliation.text = x
+
+    def on_back_pressed(self, *args):
+        UserInterface().change_screen("home_screen")
+
 
 class NewPublicationScreen(Screen):
     def __init__(self, **kwargs):
         super(NewPublicationScreen, self).__init__(**kwargs)
+        self.date_of_publication = self.ids["date_of_publication"]
+
+    def set_date_of_publication(self, date_obj):
+        self.date_of_publication.text = str(date_obj)
+
+    def on_back_pressed(self, *args):
+        UserInterface().change_screen("home_screen")
 
 
 class HomeScreen(Screen):
@@ -101,6 +151,7 @@ class UserInterface(App):
         self.bind(on_start=self.post_build_init)
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(HomeScreen(name="home_screen"))
+        sm.add_widget(AddAuthorScreen(name="add_author_screen"))
         return sm
 
     def post_build_init(self, ev):

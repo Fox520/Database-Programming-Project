@@ -8,9 +8,78 @@
             background_palette: 'Primary'
             background_hue: '500'
             elevation: 10
-            right_action_items: [['dots-vertical', lambda x: ""]]
-        BoxLayout:
-            Button:
-                text:"Go to home"
+            left_action_items: [['arrow-left', lambda x: root.on_back_pressed()]]
+           # right_action_items: [['dots-vertical', lambda x: ""]]
+        GridLayout:
+            orientation: 'vertical'
+            padding: [10,10,10,10]
+            cols: 2
+            Widget:
+            MDFlatButton:
+                id: main_button_title
+                text: "publication type"
                 on_release:
-                    app.change_screen("home_screen")
+                    root.set_menu_for_author_titles()
+                    root.instance_menu_author_titles = MDDropdownMenu(\
+                    items=root.menu_for_at, \
+                    max_height=dp(260), width_mult=4)
+                    root.instance_menu_author_titles.open(self)
+            Label:
+                text: "[color=ff3333]Publication name[/color]"
+                font_size: 25
+                markup: True
+            MDTextField:
+                id: publication_name
+                hint_text: "publication name"
+
+            Label:
+                text: "[color=ff3333]City[/color]"
+                font_size: 25
+                markup: True
+            GridLayout:
+                cols: 2
+                rows: 1
+                padding: [0,0,10,0]
+                MDFlatButton:
+                    id: main_button_affiliation
+                    text: "select city"
+                    on_release:
+                        root.set_menu_for_affiliations()
+                        root.instance_menu_affiliations= MDDropdownMenu(\
+                        items=root.menu_for_af, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_affiliations.open(self)
+                MDTextField:
+                    id: custom_affiliation
+                    hint_text: "city if not listed"
+
+            MDFlatButton:
+                text: "Choose date of publication"
+                on_release:
+                    MDDatePicker(root.set_date_of_publication).open()
+            MDTextField:
+                id: date_of_publication
+                hint_text: "YYYY-MM-DD"
+
+            Label:
+                text: "[color=ff3333]Affiliation[/color]"
+                font_size: 25
+                markup: True
+            GridLayout:
+                cols: 2
+                rows: 1
+                padding: [0,0,10,0]
+                MDFlatButton:
+                    id: main_button_affiliation
+                    text: "select title"
+                    on_release:
+                        root.set_menu_for_affiliations()
+                        root.instance_menu_affiliations= MDDropdownMenu(\
+                        items=root.menu_for_af, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_affiliations.open(self)
+                MDTextField:
+                    id: custom_affiliation
+                    hint_text: "affiliation if not available"
+            Button:
+                text: "submit"
