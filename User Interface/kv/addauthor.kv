@@ -1,0 +1,16 @@
+<AddAuthorScreen>:
+    GridLayout:
+        rows: 2
+        MDToolbar:
+            id: toolbar
+            title: "Add new author"
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+            right_action_items: [['dots-vertical', lambda x: ""]]
+        BoxLayout:
+            Button:
+                text:"Go to home"
+                on_release:
+                    app.change_screen("home_screen")

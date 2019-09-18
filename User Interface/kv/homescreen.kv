@@ -1,0 +1,31 @@
+<HomeScreen>:
+    GridLayout:
+        rows: 2
+        MDToolbar:
+            id: toolbar
+            title: "Database interface"
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+            right_action_items: [['dots-vertical', lambda x: ""]]
+
+        GridLayout:
+            rows: 2
+            cols: 3
+            orientation: 'vertical'
+            padding: [10,50,10,50]
+            Button:
+                text:"Create New Publication"
+                on_release:
+                    app.manage_screens("new_publication_screen", "add")
+                    app.change_screen("new_publication_screen")
+            Button:
+                text:"Add an author"
+                on_release:
+                    app.manage_screens("add_author_screen", "add")
+                    app.change_screen("add_author_screen")
+            Button:
+                text:"View publications"
+            Button:
+                text:"hello"
