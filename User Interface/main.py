@@ -7,7 +7,10 @@ from kivy import Config
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.dropdown import DropDown
+from kivy.uix.modalview import ModalView
 from kivy.uix.screenmanager import Screen, ScreenManager, SwapTransition
+from kivymd.uix.filemanager import MDFileManager
+
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 from kivy.uix.button import Button
@@ -33,7 +36,6 @@ class AddAuthorScreen(Screen):
         self.custom_author_title = self.ids["custom_author_title"]
         self.custom_affiliation = self.ids["custom_affiliation"]
         self.main_button_title = self.ids["main_button_title"]
-        self.main_button_affiliation = self.ids["main_button_affiliation"]
 
         # Authors
         self.menu_for_author_titles = ["Mr", "Ms", "Mrs", "Dr"]
@@ -61,8 +63,8 @@ class AddAuthorScreen(Screen):
             )
 
     def chosen_author_title(self, x):
-        toast(x)
         self.main_button_title.text = x
+        self.custom_author_title.text = x
         self.instance_menu_author_titles.dismiss()
 
     def set_menu_for_affiliations(self):
@@ -80,9 +82,8 @@ class AddAuthorScreen(Screen):
             )
 
     def chosen_affiliation(self, x):
-        toast(x)
+        self.custom_affiliation.text = x
         self.instance_menu_affiliations.dismiss()
-        self.main_button_affiliation.text = x
 
     def on_back_pressed(self, *args):
         UserInterface().change_screen("home_screen")
@@ -91,10 +92,139 @@ class AddAuthorScreen(Screen):
 class NewPublicationScreen(Screen):
     def __init__(self, **kwargs):
         super(NewPublicationScreen, self).__init__(**kwargs)
+        self.fmanager = None
+        self.fmanager_open = False
+
         self.date_of_publication = self.ids["date_of_publication"]
+        self.main_button_publication = self.ids["main_button_publication"]
+        self.custom_city = self.ids["custom_city"]
+        self.custom_publisher = self.ids["custom_publisher"]
+        self.custom_upload = self.ids["custom_upload"]
+        # City
+        self.menu_for_city = ["Oshakati", "Ongwediva",
+                              "Ondangwa"]
+        self.instance_menu_city = None
+        self.menu_for_ct = []
+        # Publisher
+        self.menu_for_publisher = ["MacMillan", "Zebra",
+                                   "New Day"]
+        self.instance_menu_publisher = None
+        self.menu_for_pb = []
+
+        # Publication type
+        self.menu_for_publication_type = ["Book", "Conference proceedings",
+                                          "Journal"]
+        self.instance_menu_publication_type = None
+        self.menu_for_pt = []
+
+        # Authors
+        self.menu_for_authors = ["Steve", "John",
+                                          "Doe"]
+        self.instance_menu_authors = None
+        self.menu_for_au = []
+        self.main_button_author = self.ids["main_button_author"]
+
+    def set_menu_for_city(self):
+        # reset menu_for_author_titles and get from db
+        if len(self.menu_for_city) < 1:
+            return
+        self.menu_for_ct = []
+        for name_item in self.menu_for_city:
+            self.menu_for_ct.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": lambda x=name_item: self.chosen_city(x),
+                }
+            )
+
+    def chosen_city(self, x):
+        self.custom_city.text = x
+        self.instance_menu_city.dismiss()
+
+    def set_menu_for_publisher(self):
+        # reset menu_for_author_titles and get from db
+        if len(self.menu_for_publisher) < 1:
+            return
+        self.menu_for_pb = []
+        for name_item in self.menu_for_publisher:
+            self.menu_for_pb.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": lambda x=name_item: self.chosen_publisher(x),
+                }
+            )
+
+    def chosen_publisher(self, x):
+        self.instance_menu_publisher.dismiss()
+
+    def set_menu_for_publication(self):
+        # reset menu_for_author_titles and get from db
+        if len(self.menu_for_publication_type) < 1:
+            return
+        self.menu_for_pt = []
+        for name_item in self.menu_for_publication_type:
+            self.menu_for_pt.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": lambda x=name_item: self.chosen_publication_type(x),
+                }
+            )
+
+    def chosen_publication_type(self, x):
+        self.main_button_publication.text = x
+        self.instance_menu_publication_type.dismiss()
+
+    def set_menu_for_authors(self):
+        if len(self.menu_for_authors) < 1:
+            return
+        self.menu_for_au = []
+        for name_item in self.menu_for_authors:
+            self.menu_for_au.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": lambda x=name_item: self.chosen_author(x),
+                }
+            )
+
+    def chosen_author(self, x):
+        self.main_button_author.text = x
+        self.instance_menu_authors.dismiss()
 
     def set_date_of_publication(self, date_obj):
         self.date_of_publication.text = str(date_obj)
+
+    def get_file_to_upload(self):
+        if not self.fmanager:
+            self.fmanager = ModalView(size_hint=(1, 1), auto_dismiss=False)
+            self.file_manager = MDFileManager(
+                exit_manager=self.exit_manager, select_path=self.select_path)
+            self.fmanager.add_widget(self.file_manager)
+            self.file_manager.show('/')  # output manager to the screen
+        self.fmanager_open = True
+        self.fmanager.open()
+
+    def select_path(self, path):
+        """It will be called when you click on the file name
+        or the catalog selection button.
+
+        :type path: str;
+        :param path: path to the selected directory or file;
+
+        """
+
+        self.exit_manager()
+        self.custom_upload.text = path
+        toast(path)
+
+    def exit_manager(self, *args):
+        """Called when the user reaches the root of the directory tree."""
+
+        self.fmanager.dismiss()
+        self.fmanager_open = False
 
     def on_back_pressed(self, *args):
         UserInterface().change_screen("home_screen")
