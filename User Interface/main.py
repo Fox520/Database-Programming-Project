@@ -18,6 +18,7 @@ from kivymd.uix.filemanager import MDFileManager
 
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
+
 # from kivy.uix.button import Button
 
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
@@ -36,7 +37,8 @@ Builder.load_string("""
 
 
 class ItemList(MDCard):
-    pass
+    def prepare_viewing_of_publication(self):
+        print(self.publication_id)
 
 
 class AddAuthorScreen(Screen):
@@ -134,7 +136,7 @@ class NewPublicationScreen(Screen):
 
         # Authors
         self.menu_for_authors = ["Steve", "John",
-                                          "Doe"]
+                                 "Doe"]
         self.instance_menu_authors = None
         self.menu_for_au = []
         self.main_button_author = self.ids["main_button_author"]
@@ -283,11 +285,11 @@ class ListPublicationScreen(Screen):
 
     def on_enter(self, *args):
         for i in range(4):
-            self.temp(f"publication type {i}", f"author names: {i}", f"edition {i}", f"volume {i}", f"city {i}",
-                      f"publisher {i}")
+            self.add_publication(f"publication type {i}", f"author names: {i}", f"edition {i}", f"volume {i}",
+                                 f"city {i}", f"publisher {i}")
 
-    def temp(self, publication_type_string="", author_names_string="", edition_string="", volume_string="",
-             city_string="", publisher_string=""):
+    def add_publication(self, publication_type_string="", author_names_string="", edition_string="", volume_string="",
+                        city_string="", publisher_string=""):
         self.publications_data.append(
             {
                 "height": dp(180),
@@ -317,6 +319,7 @@ class UserInterface(App):
     theme_cls.primary_palette = 'Yellow'
     theme_cls.theme_style = "Light"
     sm = ScreenManager()
+
     # dynamically add/remove screens to consume less memory
 
     def change_screen(self, screen_name):
@@ -337,7 +340,7 @@ class UserInterface(App):
             if action == "remove":
                 if sm.has_screen(screen_name):
                     sm.remove_widget(sm.get_screen(screen_name))
-                    print("Screen ["+screen_name+"] removed")
+                    print("Screen [" + screen_name + "] removed")
             elif action == "add":
                 if sm.has_screen(screen_name):
                     print("Screen [" + screen_name + "] already exists")
