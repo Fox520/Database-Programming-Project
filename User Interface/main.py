@@ -6,14 +6,19 @@ import traceback
 from kivy import Config
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.dropdown import DropDown
+from kivy.metrics import dp
+from kivy.clock import Clock
+# from kivy.uix.dropdown import DropDown
+from kivy.properties import ListProperty
 from kivy.uix.modalview import ModalView
 from kivy.uix.screenmanager import Screen, ScreenManager, SwapTransition
+from kivymd.uix.card import MDCard
+
 from kivymd.uix.filemanager import MDFileManager
 
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
-from kivy.uix.button import Button
+# from kivy.uix.button import Button
 
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 Config.set('graphics', 'multisamples', '0')
@@ -22,11 +27,16 @@ Builder.load_string("""
 #:include kv/homescreen.kv
 #:include kv/newpublicationscreen.kv
 #:include kv/addauthor.kv
+#:include kv/listpublication.kv
 
 #:import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
 #:import MDDatePicker   kivymd.uix.picker.MDDatePicker
 
     """)
+
+
+class ItemList(MDCard):
+    pass
 
 
 class AddAuthorScreen(Screen):
@@ -63,7 +73,6 @@ class AddAuthorScreen(Screen):
             )
 
     def chosen_author_title(self, x):
-        self.main_button_title.text = x
         self.custom_author_title.text = x
         self.instance_menu_author_titles.dismiss()
 
@@ -85,13 +94,19 @@ class AddAuthorScreen(Screen):
         self.custom_affiliation.text = x
         self.instance_menu_affiliations.dismiss()
 
+    def submit_data(self, title, fname, lname, affiliation):
+        print(title, fname, lname, affiliation)
+        # structure into xml for passing to procedure
+
     def on_back_pressed(self, *args):
         UserInterface().change_screen("home_screen")
+        UserInterface().manage_screens("add_author_screen", "remove")
 
 
 class NewPublicationScreen(Screen):
     def __init__(self, **kwargs):
         super(NewPublicationScreen, self).__init__(**kwargs)
+        # File manager
         self.fmanager = None
         self.fmanager_open = False
 
@@ -123,6 +138,13 @@ class NewPublicationScreen(Screen):
         self.instance_menu_authors = None
         self.menu_for_au = []
         self.main_button_author = self.ids["main_button_author"]
+
+        # Entries
+        self.book_title = self.ids["book_title"]
+        self.edition = self.ids["edition"]
+        self.journal_title = self.ids["journal_title"]
+        self.volume = self.ids["volume"]
+        self.conf_title = self.ids["conf_title"]
 
     def set_menu_for_city(self):
         # reset menu_for_author_titles and get from db
@@ -158,6 +180,7 @@ class NewPublicationScreen(Screen):
 
     def chosen_publisher(self, x):
         self.instance_menu_publisher.dismiss()
+        self.custom_publisher.text = x
 
     def set_menu_for_publication(self):
         # reset menu_for_author_titles and get from db
@@ -175,6 +198,27 @@ class NewPublicationScreen(Screen):
 
     def chosen_publication_type(self, x):
         self.main_button_publication.text = x
+        if x.lower() == "journal":
+            self.journal_title.disabled = False
+            self.volume.disabled = False
+            self.edition.disabled = True
+            self.book_title.disabled = True
+            self.conf_title.disabled = True
+
+        elif x.lower() == "book":
+            self.edition.disabled = False
+            self.book_title.disabled = False
+            self.volume.disabled = True
+            self.journal_title.disabled = True
+            self.conf_title.disabled = True
+
+        elif x.lower() == "conference proceedings":
+            self.conf_title.disabled = False
+            self.volume.disabled = True
+            self.journal_title.disabled = True
+            self.edition.disabled = True
+            self.book_title.disabled = True
+
         self.instance_menu_publication_type.dismiss()
 
     def set_menu_for_authors(self):
@@ -228,6 +272,38 @@ class NewPublicationScreen(Screen):
 
     def on_back_pressed(self, *args):
         UserInterface().change_screen("home_screen")
+        UserInterface().manage_screens("new_publication_screen", "remove")
+
+
+class ListPublicationScreen(Screen):
+    publications_data = ListProperty()
+
+    def __init__(self, **kwargs):
+        super(ListPublicationScreen, self).__init__(**kwargs)
+
+    def on_enter(self, *args):
+        for i in range(4):
+            self.temp(f"publication type {i}", f"author names: {i}", f"edition {i}", f"volume {i}", f"city {i}",
+                      f"publisher {i}")
+
+    def temp(self, publication_type_string="", author_names_string="", edition_string="", volume_string="",
+             city_string="", publisher_string=""):
+        self.publications_data.append(
+            {
+                "height": dp(180),
+                "publication_type_string": publication_type_string,
+                "author_names_string": author_names_string,
+                "edition_string": edition_string,
+                "volume_string": volume_string,
+                "city_string": city_string,
+                "publisher_string": publisher_string,
+                "publication_id": 0
+            }
+        )
+
+    def on_back_pressed(self):
+        UserInterface().change_screen("home_screen")
+        UserInterface().manage_screens("list_publication_screen", "remove")
 
 
 class HomeScreen(Screen):
@@ -253,14 +329,15 @@ class UserInterface(App):
         scns = {
             "home_screen": HomeScreen,
             "new_publication_screen": NewPublicationScreen,
-            "add_author_screen": AddAuthorScreen
+            "add_author_screen": AddAuthorScreen,
+            "list_publication_screen": ListPublicationScreen
         }
         try:
 
             if action == "remove":
                 if sm.has_screen(screen_name):
                     sm.remove_widget(sm.get_screen(screen_name))
-                # print("Screen ["+screen_name+"] removed")
+                    print("Screen ["+screen_name+"] removed")
             elif action == "add":
                 if sm.has_screen(screen_name):
                     print("Screen [" + screen_name + "] already exists")
@@ -281,7 +358,7 @@ class UserInterface(App):
         self.bind(on_start=self.post_build_init)
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(HomeScreen(name="home_screen"))
-        sm.add_widget(AddAuthorScreen(name="add_author_screen"))
+        # sm.add_widget(AddAuthorScreen(name="add_author_screen"))
         return sm
 
     def post_build_init(self, ev):

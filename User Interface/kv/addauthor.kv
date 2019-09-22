@@ -26,14 +26,16 @@
                     root.instance_menu_author_titles.open(self)
             MDTextField:
                 id: custom_author_title
-                hint_text: "enter if not listed"
+                hint_text: "Title if not listed"
 
             MDTextField:
                 id: first_name
+                required: True
                 hint_text: "First name"
 
             MDTextField:
                 id: last_name
+                required: True
                 hint_text: "Last name"
 
             MDRaisedButton:
@@ -46,6 +48,8 @@
                     root.instance_menu_affiliations.open(self)
             MDTextField:
                 id: custom_affiliation
-                hint_text: "enter if not listed"
+                hint_text: "Affiliation if not listed"
             Button:
-                text: "submit"
+                text: "Submit"
+                on_release:
+                    root.submit_data(custom_author_title.text, first_name.text, last_name.text, custom_affiliation.text)

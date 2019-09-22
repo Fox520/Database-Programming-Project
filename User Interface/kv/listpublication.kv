@@ -1,0 +1,84 @@
+<ListPublicationScreen>:
+    GridLayout:
+        rows: 2
+        MDToolbar:
+            id: toolbar
+            title: "Showing all publications"
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+            left_action_items: [['arrow-left', lambda x: root.on_back_pressed()]]
+
+        RecycleView:
+            id: rv
+            viewclass: 'ItemList'
+            key_size: 'height'
+            data: root.publications_data
+            RecycleBoxLayout:
+                padding: dp(10)
+                spacing: dp(10)
+                default_size: None, dp(48)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
+
+
+<ItemList>:
+    padding: dp(15)
+    spacing: dp(10)
+    elevation: 10
+
+    publication_id: 0
+    publication_type_string: ""
+    author_names_string: ""
+    edition_string: ""
+    volume_string: ""
+    city_string: ""
+    publisher_string: ""
+    publication_date_string: ""
+
+    Image:
+        source: "resources/document_image.png"
+        size_hint: None, None
+        size: dp(48), dp(48)
+        pos_hint: {"center_y": .5}
+
+    BoxLayout:
+        orientation: "vertical"
+        pos_hint: {"center_y": .5}
+        size_hint: None, None
+        size: self.minimum_size
+
+        MyLabel:
+            text: root.publication_type_string
+        MyLabel:
+            text: root.author_names_string
+
+        MyLabel:
+            text: root.edition_string
+        MyLabel:
+            text: root.volume_string
+
+        MyLabel:
+            text: root.city_string
+
+        MyLabel:
+            text: root.publisher_string
+
+        MyLabel:
+            text: root.publication_date_string
+
+    Widget:
+
+    MDRaisedButton:
+        text: "Open"
+        pos_hint: {"center_y": .5}
+        on_release: print("on_release here")
+
+
+<MyLabel@Label>:
+    color: 0, 0, 0, 1
+    size_hint: None, None
+    size: self.texture_size
