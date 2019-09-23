@@ -1,0 +1,87 @@
+CREATE DATABASE SchoolProject
+GO
+USE SchoolProject
+CREATE TABLE TITLE (
+	title_id INT PRIMARY KEY NOT NULL IDENTITY,
+	title VARCHAR(4) NOT NULL
+);
+
+CREATE TABLE AFFILIATION (
+	affiliation_id INT PRIMARY KEY NOT NULL IDENTITY,
+	affiliation_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE NAMES (
+	name_id INT PRIMARY KEY NOT NULL IDENTITY,
+	first_name VARCHAR(20) NOT NULL,
+	last_name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE AUTHOR (
+	author_id INT PRIMARY KEY NOT NULL IDENTITY,
+	name_id INT,
+	affiliation_id INT,
+	title_id INT,
+	FOREIGN KEY (name_id) REFERENCES NAMES(name_id) ON DELETE CASCADE,
+	FOREIGN KEY (affiliation_id) REFERENCES AFFILIATION(affiliation_id) ON DELETE CASCADE,
+	FOREIGN KEY (title_id) REFERENCES TITLE(title_id) ON DELETE CASCADE
+);
+
+CREATE TABLE CONFERENCE_PROCEEDING (
+	conference_proceedings_id INT PRIMARY KEY NOT NULL IDENTITY,
+	conference_proceedings_title VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE BOOK (
+	book_id INT PRIMARY KEY NOT NULL IDENTITY,
+	edition INT,
+	book_title VARCHAR(100) NOT NULL,
+);
+
+CREATE TABLE JOURNAL (
+	journal_id INT PRIMARY KEY NOT NULL IDENTITY,
+	volume INT,
+	journal_title VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE CITY(
+	city_id INT PRIMARY KEY NOT NULL IDENTITY,
+	city_name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE FILES(
+	file_path_id INT PRIMARY KEY NOT NULL IDENTITY,
+	file_path VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE PUBLISHER(
+	publisher_id INT PRIMARY KEY NOT NULL IDENTITY,
+	publisher_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE PUBLICATION (
+	publication_id INT PRIMARY KEY NOT NULL IDENTITY,
+	date_of_publication DATE NOT NULL,
+	abstract VARCHAR(500),
+	book_id INT,
+	journal_id INT,
+	conference_proceedings_id INT,
+	city_id INT,
+	publisher_id INT,
+	file_path_id INT,
+	FOREIGN KEY (book_id) REFERENCES BOOK(book_id) ON DELETE CASCADE,
+	FOREIGN KEY (journal_id) REFERENCES JOURNAL(journal_id) ON DELETE CASCADE,
+	FOREIGN KEY (conference_proceedings_id) REFERENCES CONFERENCE_PROCEEDING(conference_proceedings_id) ON DELETE CASCADE,
+	FOREIGN KEY (city_id) REFERENCES CITY(city_id) ON DELETE CASCADE,
+	FOREIGN KEY (publisher_id) REFERENCES PUBLISHER(publisher_id) ON DELETE CASCADE,
+	FOREIGN KEY (file_path_id) REFERENCES FILES(file_path_id) ON DELETE CASCADE
+
+);
+
+CREATE TABLE Author_Publication_Junction_Table(
+	author_publication_id INT PRIMARY KEY CLUSTERED(author_id, publication_id) NOT NULL IDENTITY,
+	author_id INT NOT NULL,
+	publication_id INT NOT NULL,
+	FOREIGN KEY (author_id) REFERENCES AUTHOR(author_id) ON DELETE CASCADE,
+	FOREIGN KEY (publication_id) REFERENCES PUBLICATION(publication_id) ON DELETE CASCADE
+);
