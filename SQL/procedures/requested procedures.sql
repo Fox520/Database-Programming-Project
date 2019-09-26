@@ -86,3 +86,13 @@ SELECT * FROM Publication WHERE City = @City AND File = @File AND @Publisher = P
 GO;
 
 
+-- get all books or journals or conference proceedings in database
+
+
+CREATE PROCEDURE getAllPublicationType
+@Book nvarchar(30),
+@Journal nvarchar(30),
+@[Conference Proceedings] nvarchar(30)
+AS
+SELECT * FROM Publication WHERE Book = @Book OR Journal = @Journal OR @[Conference Proceedings] = [Conference Proceedings]
+GO;
