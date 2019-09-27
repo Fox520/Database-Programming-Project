@@ -1,88 +1,74 @@
--- get all authors information
-
+USE SchoolProject
+-- get all authors
 
 CREATE PROCEDURE getAllAuthors
 AS
 SELECT * FROM Author
-GO;
-
--- get all affiliations in database
-
-
-CREATE PROCEDURE getAllAffiliations
-AS
-SELECT * FROM Affiliation
-GO;
--- get all Names in database
-
+FOR XML RAW('author'), ROOT('authors'), ELEMENTS
+Go
+-- get all names
 
 CREATE PROCEDURE getAllNames
 AS
 SELECT * FROM Names
-GO;
+FOR XML RAW('name'), ROOT('names'), ELEMENTS
+GO
+-- get all affiliations
 
+CREATE PROCEDURE getAllAffiliations
+AS
+SELECT * FROM Affiliation
+FOR XML RAW('affiliation'), ROOT('affiliations'), ELEMENTS
+GO
 -- get all titles in database
 
-CREATE PROCEDURE SelectAllTitles
+CREATE PROCEDURE getAllTitles
 AS
+SET NOCOUNT ON;
 SELECT * FROM Title
-GO;
-
--- get all publications information
-
+FOR XML RAW('title'), ROOT('titles'), ELEMENTS
+GO
+-- get all publications
 
 CREATE PROCEDURE getAllPublications
 AS
 SELECT * FROM Publication
-GO;
+FOR XML RAW('publication'), ROOT('publications'), ELEMENTS
+GO
 
+-- get authors for a certain publication
 
--- get publications by certain author
-
-
-CREATE PROCEDURE getAllPublicationAuthor
-@Author nvarchar(30)
+CREATE PROCEDURE getAuthorsForPublication
+@Author_id nvarchar(30)
 AS
-SELECT * FROM Publication WHERE Author = @Author
-GO;
-
--- get file path (if any) of a publication
-
-
-CREATE PROCEDURE getAllFile
-@Publication nvarchar(30)
-AS
-SELECT * FROM Publication WHERE File = @File
-GO;
-
+SELECT * FROM Author_Publication_Junction_Table WHERE author_id = @Author_id
+FOR XML RAW('author_publication'), ROOT('author_publications'), ELEMENTS
+GO
 
 -- get publications from certain city
 
-CREATE PROCEDURE getAllPublicationCity
-@City nvarchar(30)
+CREATE PROCEDURE getAllPublicationsForCity
+@City_id nvarchar(30)
 AS
-SELECT * FROM Publication WHERE City = @City
-GO;
-
+SELECT * FROM Publication WHERE city_id = @City_id
+FOR XML RAW('publication_city'), ROOT('publication_cities'), ELEMENTS
+GO
 
 -- get publications from certain publishers
 
-CREATE PROCEDURE getAllPublicationPublisher
-@Publisher nvarchar(30)
+CREATE PROCEDURE getPublicationsForPublisher
+@publisher_id nvarchar(30)
 AS
-SELECT * FROM Publication WHERE Publisher = @Publisher
-GO;
-
+SELECT * FROM Publication WHERE publication_id = @publisher_id
+FOR XML RAW('publication_publisher'), ROOT('publication_publishers'), ELEMENTS
+GO
 
 -- get publication details (the fields)
-
-
-CREATE PROCEDURE getAllPublicationDetail
-@City nvarchar(30),
-@File nvarchar(30),
-@Publisher nvarchar(30)
-AS
-SELECT * FROM Publication WHERE City = @City AND File = @File AND @Publisher = Publisher
-GO;
-
-
+-- this is the same as getAllPublications procedure
+-- CREATE PROCEDURE getDetailsOfAllPublications
+-- @City nvarchar(30),
+-- @File nvarchar(30),
+-- @Publisher_id nvarchar(30)
+-- AS
+-- SELECT * FROM Publication WHERE City_id = @City_id AND file_path_id = @File_id AND @Publisher = Publisher_id
+-- GO
