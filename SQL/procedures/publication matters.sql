@@ -5,10 +5,10 @@ ALTER PROCEDURE spAddPublication
 @book_id INT = NULL,
 @journal_id INT = NULL,
 @conference_proceedings_id INT = NULL,
-@city_id INT = NULL,
-@publisher_id INT=NULL,
+@city_id INT,
+@publisher_id INT,
 @file_path VARCHAR(100) = NULL,
-@date_of_publication DATE='',
+@date_of_publication DATE,
 @abstract VARCHAR(500) = NULL
 AS
 BEGIN
@@ -22,11 +22,29 @@ BEGIN
 			@file_id = @file_path_id OUTPUT; 
 	END
 	-- try-catch if no publication id's provided
-		IF @book_id IS NULL AND @journal_id IS NULL AND @conference_proceedings_id IS NULL
-		BEGIN
-			;THROW 99001, 'no id supllied for publication', 1;
-			RETURN
-		END
+	IF @book_id IS NULL AND @journal_id IS NULL AND @conference_proceedings_id IS NULL
+	BEGIN
+		;THROW 99001, 'No id supplied for book/conference proceedings/journal', 1;
+		RETURN
+	END
+
+	IF @publisher_id = ''
+	BEGIN
+		;THROW 99001, 'Supply a publisher', 1;
+		RETURN
+	END
+
+	IF @city_id = ''
+	BEGIN
+		;THROW 99001, 'Supply a city', 1;
+		RETURN
+	END
+
+	IF @date_of_publication = ''
+	BEGIN
+		;THROW 99001, 'Invalid date entered', 1;
+		RETURN
+	END
 	insert into PUBLICATION(book_id, journal_id, conference_proceedings_id, city_id, publisher_id, file_path_id, date_of_publication, abstract)
 	values(@book_id, @journal_id, @conference_proceedings_id, @city_id, @publisher_id, @file_path_id, @date_of_publication, @abstract)
 	SELECT 'ADD went Through'
@@ -44,6 +62,12 @@ CREATE PROCEDURE spAddConferenceProceedings
 @conf_proceedings_title VARCHAR(100)
 AS
 BEGIN
+	IF @book_title IS NULL or @book_title = ''
+	BEGIN
+		;THROW 99001, 'Provide conference proceedings title', 1;
+		RETURN
+	END
+
 	insert into CONFERENCE_PROCEEDING(conference_proceedings_title) values(@conf_proceedings_title)
 END
 GO
@@ -52,6 +76,18 @@ CREATE PROCEDURE spAddBook
 @edition INT
 AS
 BEGIN
+	IF @book_title IS NULL or @book_title = ''
+	BEGIN
+		;THROW 99001, 'Provide book title', 1;
+		RETURN
+	END
+
+	IF @edition IS NULL
+	BEGIN
+		;THROW 99001, 'Provide book edition', 1;
+		RETURN
+	END
+
 	insert into BOOK(book_title, edition) values(@book_title, @edition)
 END
 GO
@@ -60,6 +96,17 @@ CREATE PROCEDURE spAddJournal
 @volume INT
 AS
 BEGIN
+	IF @journal_title IS NULL or @journal_title = ''
+	BEGIN
+		;THROW 99001, 'Provide journal title', 1;
+		RETURN
+	END
+
+	IF @volume IS NULL
+	BEGIN
+		;THROW 99001, 'Provide journal volume', 1;
+		RETURN
+	END
 	insert into JOURNAL(journal_title, volume) values(@journal_title, @volume)
 END
 GO
