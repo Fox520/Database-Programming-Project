@@ -11,18 +11,13 @@ CREATE TABLE AFFILIATION (
 	affiliation_name VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE NAMES (
-	name_id INT PRIMARY KEY NOT NULL IDENTITY,
-	first_name VARCHAR(20) NOT NULL,
-	last_name VARCHAR(20) NOT NULL
-);
 
 CREATE TABLE AUTHOR (
 	author_id INT PRIMARY KEY NOT NULL IDENTITY,
-	name_id INT,
-	affiliation_id INT,
-	title_id INT,
-	FOREIGN KEY (name_id) REFERENCES NAMES(name_id) ON DELETE CASCADE,
+	affiliation_id INT NOT NULL,
+	title_id INT NOT NULL,
+	first_name VARCHAR(20) NOT NULL,
+	last_name VARCHAR(20) NOT NULL
 	FOREIGN KEY (affiliation_id) REFERENCES AFFILIATION(affiliation_id) ON DELETE CASCADE,
 	FOREIGN KEY (title_id) REFERENCES TITLE(title_id) ON DELETE CASCADE
 );
@@ -34,13 +29,13 @@ CREATE TABLE CONFERENCE_PROCEEDING (
 
 CREATE TABLE BOOK (
 	book_id INT PRIMARY KEY NOT NULL IDENTITY,
-	edition INT,
+	edition INT NOT NULL,
 	book_title VARCHAR(100) NOT NULL,
 );
 
 CREATE TABLE JOURNAL (
 	journal_id INT PRIMARY KEY NOT NULL IDENTITY,
-	volume INT,
+	volume INT NOT NULL,
 	journal_title VARCHAR(100) NOT NULL
 );
 
@@ -66,8 +61,8 @@ CREATE TABLE PUBLICATION (
 	book_id INT,
 	journal_id INT,
 	conference_proceedings_id INT,
-	city_id INT,
-	publisher_id INT,
+	city_id INT NOT NULL,
+	publisher_id INT NOT NULL,
 	file_path_id INT,
 	FOREIGN KEY (book_id) REFERENCES BOOK(book_id) ON DELETE CASCADE,
 	FOREIGN KEY (journal_id) REFERENCES JOURNAL(journal_id) ON DELETE CASCADE,
