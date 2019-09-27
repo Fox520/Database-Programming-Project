@@ -1,7 +1,7 @@
 USE SchoolProject
 Go
 -- Add publication
-ALTER PROCEDURE spAddPublication
+CREATE PROCEDURE spAddPublication
 @book_id INT = NULL,
 @journal_id INT = NULL,
 @conference_proceedings_id INT = NULL,
@@ -62,7 +62,7 @@ CREATE PROCEDURE spAddConferenceProceedings
 @conf_proceedings_title VARCHAR(100)
 AS
 BEGIN
-	IF @book_title IS NULL or @book_title = ''
+	IF @conf_proceedings_title IS NULL or @conf_proceedings_title = ''
 	BEGIN
 		;THROW 99001, 'Provide conference proceedings title', 1;
 		RETURN
