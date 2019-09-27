@@ -13,20 +13,33 @@
         GridLayout:
             orientation: 'vertical'
             padding: [10,10,10,10]
-            cols: 2
+            cols: 1
             spacing: 15
-            MDRaisedButton:
-                id: main_button_title
-                text: "Select author title"
-                on_release:
-                    root.set_menu_for_author_titles()
-                    root.instance_menu_author_titles = MDDropdownMenu(\
-                    items=root.menu_for_at, \
-                    max_height=dp(260), width_mult=4)
-                    root.instance_menu_author_titles.open(self)
-            MDTextField:
-                id: custom_author_title
-                hint_text: "Title if not listed"
+            GridLayout:
+                rows: 2
+                cols: 2
+                Button:
+                    id: main_button_title
+                    text: "Select author title"
+                    on_release:
+                        root.set_menu_for_author_titles()
+                        root.instance_menu_author_titles = MDDropdownMenu(\
+                        items=root.menu_for_at, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_author_titles.open(self)
+                Widget:
+                Button:
+                    text: "Select affiliation"
+                    on_release:
+                        root.set_menu_for_affiliations()
+                        root.instance_menu_affiliations= MDDropdownMenu(\
+                        items=root.menu_for_af, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_affiliations.open(self)
+                MDTextField:
+                    id: custom_affiliation
+                    disabled: True
+                    hint_text: "Affiliation"
 
             MDTextField:
                 id: first_name
@@ -38,18 +51,7 @@
                 required: True
                 hint_text: "Last name"
 
-            MDRaisedButton:
-                text: "Select affiliation"
-                on_release:
-                    root.set_menu_for_affiliations()
-                    root.instance_menu_affiliations= MDDropdownMenu(\
-                    items=root.menu_for_af, \
-                    max_height=dp(260), width_mult=4)
-                    root.instance_menu_affiliations.open(self)
-            MDTextField:
-                id: custom_affiliation
-                hint_text: "Affiliation if not listed"
             Button:
                 text: "Submit"
                 on_release:
-                    root.submit_data(custom_author_title.text, first_name.text, last_name.text, custom_affiliation.text)
+                    root.submit_data(main_button_title.text, first_name.text, last_name.text, custom_affiliation.text)

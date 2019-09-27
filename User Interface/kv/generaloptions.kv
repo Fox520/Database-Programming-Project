@@ -1,0 +1,62 @@
+<GeneralOptions>:
+    GridLayout:
+        rows: 2
+        MDToolbar:
+            id: toolbar
+            title: "General options"
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+            left_action_items: [['arrow-left', lambda x: root.on_back_pressed()]]
+
+        GridLayout:
+            orientation: 'vertical'
+            padding: [10,0,10,10]
+            spacing: 5
+            cols: 1
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Add new affiliation to the system"
+                    on_release:
+                        root.show_input_dialog(input_type="new_affiliation", the_title="Add new affiliation")
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Add new title to the system"
+                    on_release:
+                        root.show_input_dialog(input_type="new_title", the_title="Add new title")
+
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Update an existing title"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Update first and last name of existing author"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Update name of existing affiliation"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Delete affiliation from the system"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Delete author from the system"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Delete publication from the system"

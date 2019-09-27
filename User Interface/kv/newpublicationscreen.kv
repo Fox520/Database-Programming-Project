@@ -26,13 +26,17 @@
                     root.instance_menu_publication_type.open(self)
             MDRaisedButton:
                 id: main_button_author
-                text: "Select Author"
+                text: "Add Author"
                 on_release:
                     root.set_menu_for_authors()
                     root.instance_menu_authors= MDDropdownMenu(\
                     items=root.menu_for_au, \
                     max_height=dp(260), width_mult=4)
                     root.instance_menu_authors.open(self)
+
+            MDTextField:
+                id: custom_authors
+                disabled: True
 
             MDRaisedButton:
                 text: "Select publisher"

@@ -12,6 +12,8 @@ from kivy.clock import Clock
 from kivy.properties import ListProperty
 from kivy.uix.modalview import ModalView
 from kivy.uix.screenmanager import Screen, ScreenManager, SwapTransition
+from kivymd.uix.dialog import MDInputDialog
+
 from kivymd.uix.card import MDCard
 
 from kivymd.uix.filemanager import MDFileManager
@@ -19,7 +21,6 @@ from kivymd.uix.filemanager import MDFileManager
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 
-# from kivy.uix.button import Button
 
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 Config.set('graphics', 'multisamples', '0')
@@ -29,9 +30,11 @@ Builder.load_string("""
 #:include kv/newpublicationscreen.kv
 #:include kv/addauthor.kv
 #:include kv/listpublication.kv
+#:include kv/generaloptions.kv
 
 #:import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
 #:import MDDatePicker   kivymd.uix.picker.MDDatePicker
+#:import Magnet magnet.Magnet
 
     """)
 
@@ -45,7 +48,6 @@ class AddAuthorScreen(Screen):
     def __init__(self, **kwargs):
         super(AddAuthorScreen, self).__init__(**kwargs)
 
-        self.custom_author_title = self.ids["custom_author_title"]
         self.custom_affiliation = self.ids["custom_affiliation"]
         self.main_button_title = self.ids["main_button_title"]
 
@@ -75,7 +77,7 @@ class AddAuthorScreen(Screen):
             )
 
     def chosen_author_title(self, x):
-        self.custom_author_title.text = x
+        self.main_button_title.text = x
         self.instance_menu_author_titles.dismiss()
 
     def set_menu_for_affiliations(self):
@@ -117,6 +119,7 @@ class NewPublicationScreen(Screen):
         self.custom_city = self.ids["custom_city"]
         self.custom_publisher = self.ids["custom_publisher"]
         self.custom_upload = self.ids["custom_upload"]
+        self.custom_authors = self.ids["custom_authors"]
         # City
         self.menu_for_city = ["Oshakati", "Ongwediva",
                               "Ondangwa"]
@@ -237,7 +240,20 @@ class NewPublicationScreen(Screen):
             )
 
     def chosen_author(self, x):
-        self.main_button_author.text = x
+        # self.main_button_author.text = x
+        if self.custom_authors.text == "":
+            toAdd = x
+            #self.custom_authors.text = x
+        else:
+            toAdd = x + "," + self.custom_authors.text
+            #self.custom_authors.text = x + "," + self.custom_authors.text
+
+        if toAdd.count(x) > 1:
+            # re-entering, don't accept
+            return
+        self.custom_authors.text = toAdd
+
+
         self.instance_menu_authors.dismiss()
 
     def set_date_of_publication(self, date_obj):
@@ -308,6 +324,35 @@ class ListPublicationScreen(Screen):
         UserInterface().manage_screens("list_publication_screen", "remove")
 
 
+class GeneralOptions(Screen):
+    def __init__(self, **kwargs):
+        super(GeneralOptions, self).__init__(**kwargs)
+
+    def show_input_dialog(self, input_type="", the_title=""):
+
+        if input_type == "new_affiliation":
+            the_callback = self.callback_for_add_affiliation
+        elif input_type == "new_title":
+            the_callback = self.callback_for_add_title
+
+        dialog = MDInputDialog(
+            title=the_title, size_hint=(.4, .4),
+            text_button_ok='Accept',
+            events_callback=the_callback)
+        dialog.open()
+
+    def callback_for_add_affiliation(self, *args):
+        print(args[1].text_field.text)
+
+    def callback_for_add_title(self, *args):
+        print(args[1].text_field.text)
+        print("raaaaaa")
+
+    def on_back_pressed(self):
+        UserInterface().change_screen("home_screen")
+        UserInterface().manage_screens("general_options_screen", "remove")
+
+
 class HomeScreen(Screen):
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
@@ -333,7 +378,8 @@ class UserInterface(App):
             "home_screen": HomeScreen,
             "new_publication_screen": NewPublicationScreen,
             "add_author_screen": AddAuthorScreen,
-            "list_publication_screen": ListPublicationScreen
+            "list_publication_screen": ListPublicationScreen,
+            "general_options_screen": GeneralOptions
         }
         try:
 
