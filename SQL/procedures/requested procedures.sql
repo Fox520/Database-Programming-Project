@@ -64,7 +64,7 @@ FOR XML RAW('publication_publisher'), ROOT('publication_publishers'), ELEMENTS
 GO
 
 -- get publication details (the fields)
--- this is the same as getAllPublications procedure
+-- this is the same as getAllPublications procedure in my view, that's why it's commented out
 -- CREATE PROCEDURE getDetailsOfAllPublications
 -- @City nvarchar(30),
 -- @File nvarchar(30),
@@ -72,3 +72,11 @@ GO
 -- AS
 -- SELECT * FROM Publication WHERE City_id = @City_id AND file_path_id = @File_id AND @Publisher = Publisher_id
 -- GO
+
+CREATE PROCEDURE getAllPublicationType
+@Book nvarchar(30),
+@Journal nvarchar(30),
+@[Conference Proceedings] nvarchar(30)
+AS
+SELECT * FROM Publication WHERE Book = @Book OR Journal = @Journal OR @[Conference Proceedings] = [Conference Proceedings]
+GO;
