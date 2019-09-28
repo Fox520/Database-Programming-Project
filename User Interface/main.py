@@ -3,12 +3,12 @@
 
 import os
 import traceback
+from sqlops import SqlInterface
 from kivy import Config
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.clock import Clock
-# from kivy.uix.dropdown import DropDown
+
 from kivy.properties import ListProperty
 from kivy.uix.modalview import ModalView
 from kivy.uix.screenmanager import Screen, ScreenManager, SwapTransition
@@ -21,9 +21,10 @@ from kivymd.uix.filemanager import MDFileManager
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 
-
 os.environ['KIVY_GL_BACKEND'] = 'sdl2'
 Config.set('graphics', 'multisamples', '0')
+
+database_interface = SqlInterface()
 
 Builder.load_string("""
 #:include kv/homescreen.kv
@@ -48,19 +49,37 @@ class AddAuthorScreen(Screen):
     def __init__(self, **kwargs):
         super(AddAuthorScreen, self).__init__(**kwargs)
 
+        self.title_dictionary = {}
+        self.affiliations_dictionary = {}
+
         self.custom_affiliation = self.ids["custom_affiliation"]
         self.main_button_title = self.ids["main_button_title"]
 
         # Authors
-        self.menu_for_author_titles = ["Mr", "Ms", "Mrs", "Dr"]
+        self.menu_for_author_titles = []
         self.instance_menu_author_titles = None
         self.menu_for_at = []
 
         # Affiliations
-        self.menu_for_affiliations = ["Namibia University of Science and Technology", "University of Namibia",
-                                      "International University of Management"]
+        self.menu_for_affiliations = []
         self.instance_menu_affiliations = None
         self.menu_for_af = []
+
+    def on_enter(self, *args):
+        self.setup_affiliations()
+        self.setup_titles()
+
+    def setup_titles(self):
+        self.title_dictionary = database_interface.get_titles()
+        if len(self.title_dictionary) > 0:
+            for k, v in self.title_dictionary.items():
+                self.menu_for_author_titles.append(k)
+
+    def setup_affiliations(self):
+        self.affiliations_dictionary = database_interface.get_affiliations()
+        if len(self.affiliations_dictionary) > 0:
+            for k, v in self.affiliations_dictionary.items():
+                self.menu_for_affiliations.append(k)
 
     def set_menu_for_author_titles(self):
         # reset menu_for_author_titles and get from db
@@ -98,9 +117,12 @@ class AddAuthorScreen(Screen):
         self.custom_affiliation.text = x
         self.instance_menu_affiliations.dismiss()
 
-    def submit_data(self, title, fname, lname, affiliation):
-        print(title, fname, lname, affiliation)
-        # structure into xml for passing to procedure
+    def submit_data(self, title=None, fname="", lname="", affiliation=None):
+        t_id = self.title_dictionary.get(title, None)
+        af_id = self.affiliations_dictionary.get(affiliation, None)
+        print(t_id, fname, lname, af_id)
+        output = database_interface.add_author(title_id=t_id, affiliation_id=af_id, fname=fname, lname=lname)
+        toast(output)
 
     def on_back_pressed(self, *args):
         UserInterface().change_screen("home_screen")
@@ -243,16 +265,15 @@ class NewPublicationScreen(Screen):
         # self.main_button_author.text = x
         if self.custom_authors.text == "":
             toAdd = x
-            #self.custom_authors.text = x
+            # self.custom_authors.text = x
         else:
             toAdd = x + "," + self.custom_authors.text
-            #self.custom_authors.text = x + "," + self.custom_authors.text
+            # self.custom_authors.text = x + "," + self.custom_authors.text
 
         if toAdd.count(x) > 1:
             # re-entering, don't accept
             return
         self.custom_authors.text = toAdd
-
 
         self.instance_menu_authors.dismiss()
 
@@ -342,11 +363,12 @@ class GeneralOptions(Screen):
         dialog.open()
 
     def callback_for_add_affiliation(self, *args):
-        print(args[1].text_field.text)
+        output = database_interface.add_affiliation(args[1].text_field.text)
+        toast(output)
 
     def callback_for_add_title(self, *args):
-        print(args[1].text_field.text)
-        print("raaaaaa")
+        output = database_interface.add_title(args[1].text_field.text)
+        toast(output)
 
     def on_back_pressed(self):
         UserInterface().change_screen("home_screen")
