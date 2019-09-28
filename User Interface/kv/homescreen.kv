@@ -31,8 +31,12 @@
                     app.manage_screens("list_publication_screen", "add")
                     app.change_screen("list_publication_screen")
             Button:
-                text:"Options"
+                text:"Author Options"
                 on_release:
-                    app.manage_screens("general_options_screen", "add")
-                    app.change_screen("general_options_screen")
-
+                    app.manage_screens("general_author_options_screen", "add")
+                    app.change_screen("general_author_options_screen")
+            Button:
+                text:"Publication Options"
+                on_release:
+                    app.manage_screens("general_publication_options_screen", "add")
+                    app.change_screen("general_publication_options_screen")

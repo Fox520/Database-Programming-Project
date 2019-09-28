@@ -1,9 +1,9 @@
-<GeneralOptions>:
+<GeneralAuthorOptions>:
     GridLayout:
         rows: 2
         MDToolbar:
             id: toolbar
-            title: "General options"
+            title: "Author options"
             md_bg_color: app.theme_cls.primary_color
             background_palette: 'Primary'
             background_hue: '500'
@@ -55,8 +55,61 @@
                 duration: 1
                 Button:
                     text: "Delete author from the system"
+
+<GeneralPublicationOptions>:
+    GridLayout:
+        rows: 2
+        MDToolbar:
+            id: toolbar
+            title: "Publication options"
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+            left_action_items: [['arrow-left', lambda x: root.on_back_pressed()]]
+
+        GridLayout:
+            orientation: 'vertical'
+            padding: [10,0,10,10]
+            spacing: 5
+            cols: 1
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
-                    text: "Delete publication from the system"
+                    text: "Add new publisher to the system"
+                    on_release:
+                        root.show_input_dialog(input_type="new_affiliation", the_title="Add new affiliation")
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Add new city to the system"
+                    on_release:
+                        root.show_input_dialog(input_type="new_title", the_title="Add new title")
+
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Update an existing publisher name"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Update existing city name"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Delete existing city"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Delete a publisher"
+            Magnet:
+                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
+                duration: 1
+                Button:
+                    text: "Delete a publication"

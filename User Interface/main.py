@@ -120,7 +120,6 @@ class AddAuthorScreen(Screen):
     def submit_data(self, title=None, fname="", lname="", affiliation=None):
         t_id = self.title_dictionary.get(title, None)
         af_id = self.affiliations_dictionary.get(affiliation, None)
-        print(t_id, fname, lname, af_id)
         output = database_interface.add_author(title_id=t_id, affiliation_id=af_id, fname=fname, lname=lname)
         toast(output)
 
@@ -345,9 +344,9 @@ class ListPublicationScreen(Screen):
         UserInterface().manage_screens("list_publication_screen", "remove")
 
 
-class GeneralOptions(Screen):
+class GeneralAuthorOptions(Screen):
     def __init__(self, **kwargs):
-        super(GeneralOptions, self).__init__(**kwargs)
+        super(GeneralAuthorOptions, self).__init__(**kwargs)
 
     def show_input_dialog(self, input_type="", the_title=""):
 
@@ -373,6 +372,11 @@ class GeneralOptions(Screen):
     def on_back_pressed(self):
         UserInterface().change_screen("home_screen")
         UserInterface().manage_screens("general_options_screen", "remove")
+
+
+class GeneralPublicationOptions(Screen):
+    def __init__(self, **kwargs):
+        super(GeneralPublicationOptions, self).__init__(**kwargs)
 
 
 class HomeScreen(Screen):
@@ -401,7 +405,8 @@ class UserInterface(App):
             "new_publication_screen": NewPublicationScreen,
             "add_author_screen": AddAuthorScreen,
             "list_publication_screen": ListPublicationScreen,
-            "general_options_screen": GeneralOptions
+            "general_author_options_screen": GeneralAuthorOptions,
+            "general_publication_options_screen": GeneralPublicationOptions
         }
         try:
 
