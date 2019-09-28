@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # encoding=utf-8
-
+import functools
 import os
 import traceback
+
+from kivy.uix.popup import Popup
+
 from sqlops import SqlInterface
 from kivy import Config
 from kivy.app import App
@@ -377,6 +380,57 @@ class GeneralAuthorOptions(Screen):
 class GeneralPublicationOptions(Screen):
     def __init__(self, **kwargs):
         super(GeneralPublicationOptions, self).__init__(**kwargs)
+
+        # publisher
+        self.menu_for_publisher = []
+        self.instance_menu_publisher = None
+        self.menu_for_pb = []
+
+        # city
+        self.menu_for_city = []
+        self.instance_menu_city = None
+        self.menu_for_ct = []
+
+    def setup_publisher(self):
+        pass
+
+    def setup_city(self):
+        pass
+
+    def set_menu_for_publisher(self, action):
+        # reset menu_for_author_titles and get from db
+        if len(self.menu_for_publisher) < 1:
+            return
+        self.menu_for_pb = []
+        for name_item in self.menu_for_publisher:
+            self.menu_for_pb.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": functools.partial(self.chosen_publisher, name_item, action),
+                }
+            )
+
+    def chosen_publisher(self, x, action):
+        print(x, action)
+        self.instance_menu_publisher.dismiss()
+
+    def set_menu_for_city(self, action):
+        if len(self.menu_for_city) < 1:
+            return
+        self.menu_for_ct = []
+        for name_item in self.menu_for_city:
+            self.menu_for_ct.append(
+                {
+                    "viewclass": "OneLineListItem",
+                    "text": name_item,
+                    "on_release": functools.partial(self.chosen_city, name_item, action),
+                }
+            )
+
+    def chosen_city(self, x, action):
+        print(x, action)
+        self.instance_menu_city.dismiss()
 
 
 class HomeScreen(Screen):
