@@ -10,10 +10,20 @@ BEGIN
 		;THROW 99001, 'Provide conference proceedings title', 1;
 		RETURN
 	END
-
-	insert into CONFERENCE_PROCEEDING(conference_proceedings_title) values(@conf_proceedings_title)
-	SET @conf_id = SCOPE_IDENTITY()
-	SELECT @conf_id
+	BEGIN TRY
+		insert into CONFERENCE_PROCEEDING(conference_proceedings_title) values(@conf_proceedings_title)
+		SET @conf_id = SCOPE_IDENTITY()
+		SELECT @conf_id
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
 GO
 CREATE PROCEDURE spAddBook
@@ -34,9 +44,20 @@ BEGIN
 		;THROW 99001, 'Provide book edition', 1;
 		RETURN
 	END
-	insert into BOOK(book_title, edition) values(@book_title, @edition)
-	SET @bk_id = SCOPE_IDENTITY()
-	SELECT @bk_id
+	BEGIN TRY
+		insert into BOOK(book_title, edition) values(@book_title, @edition)
+		SET @bk_id = SCOPE_IDENTITY()
+		SELECT @bk_id
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
 GO
 CREATE PROCEDURE spAddJournal
@@ -56,9 +77,20 @@ BEGIN
 		;THROW 99001, 'Provide journal volume', 1;
 		RETURN
 	END
-	insert into JOURNAL(journal_title, volume) values(@journal_title, @volume)
-	SET @journ_id = SCOPE_IDENTITY()
-	SELECT @journ_id
+	BEGIN TRY
+		insert into JOURNAL(journal_title, volume) values(@journal_title, @volume)
+		SET @journ_id = SCOPE_IDENTITY()
+		SELECT @journ_id
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
 
 GO
@@ -71,7 +103,18 @@ BEGIN
 		;THROW 99001, 'Publication cannot be empty', 1;
 		RETURN
 	END
-	insert into PUBLISHER(publisher_name) values(@publication_name)
+	BEGIN TRY
+		insert into PUBLISHER(publisher_name) values(@publication_name)
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
 
 GO
@@ -85,7 +128,18 @@ BEGIN
 		;THROW 99001, 'File path cannot be empty', 1;
 		RETURN
 	END
-	insert into FILES(file_path) values(@file_path)
-	SET @file_id = SCOPE_IDENTITY()
-	SELECT @file_id
+	BEGIN TRY
+		insert into FILES(file_path) values(@file_path)
+		SET @file_id = SCOPE_IDENTITY()
+		SELECT @file_id
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
