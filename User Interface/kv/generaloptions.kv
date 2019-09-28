@@ -79,37 +79,63 @@
                 Button:
                     text: "Add new publisher to the system"
                     on_release:
-                        root.show_input_dialog(input_type="new_affiliation", the_title="Add new affiliation")
+                        root.set_menu_for_publisher("insert")
+                        root.instance_menu_publisher = MDDropdownMenu(\
+                        items=root.menu_for_pb, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_publisher.open(self)
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
                     text: "Add new city to the system"
                     on_release:
-                        root.show_input_dialog(input_type="new_title", the_title="Add new title")
-
+                        root.set_menu_for_city("insert")
+                        root.instance_menu_city = MDDropdownMenu(\
+                        items=root.menu_for_ct, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_city.open(self)
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
                     text: "Update an existing publisher name"
+                    on_release:
+                        root.set_menu_for_publisher("update")
+                        root.instance_menu_publisher = MDDropdownMenu(\
+                        items=root.menu_for_pb, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_publisher.open(self)
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
                     text: "Update existing city name"
+                    on_release:
+                        root.set_menu_for_city("update")
+                        root.instance_menu_city = MDDropdownMenu(\
+                        items=root.menu_for_ct, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_city.open(self)
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
                     text: "Delete existing city"
+                    on_release:
+                        root.set_menu_for_city("delete")
+                        root.instance_menu_city = MDDropdownMenu(\
+                        items=root.menu_for_ct, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_city.open(self)
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
                     text: "Delete a publisher"
-            Magnet:
-                transitions: {'pos': 'out_quad', 'size': 'in_expo'}
-                duration: 1
-                Button:
-                    text: "Delete a publication"
+                    on_release:
+                        root.set_menu_for_publisher("delete")
+                        root.instance_menu_publisher = MDDropdownMenu(\
+                        items=root.menu_for_pb, \
+                        max_height=dp(260), width_mult=4)
+                        root.instance_menu_publisher.open(self)
