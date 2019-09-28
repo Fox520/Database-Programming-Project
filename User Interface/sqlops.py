@@ -121,3 +121,12 @@ class SqlInterface:
         for pair in rows:
             affiliations_dict[pair[1]] = pair[0]
         return affiliations_dict
+
+    def get_publishers(self):
+        pass
+
+    def get_cities(self):
+        pass
+
+    def get_publications(self):
+        pass
