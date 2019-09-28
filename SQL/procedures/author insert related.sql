@@ -27,7 +27,18 @@ BEGIN
 		;THROW 99001, 'Provide a title_id', 1;
 		RETURN
 	END
-	insert into AUTHOR(title_id, first_name, last_name, affiliation_id) values( @title_id, @fname, @lname, @affiliation_id)
+	BEGIN TRY
+		insert into AUTHOR(title_id, first_name, last_name, affiliation_id) values( @title_id, @fname, @lname, @affiliation_id)
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
 
 GO
@@ -40,7 +51,18 @@ BEGIN
 		;THROW 99001, 'Title cannot be empty', 1;
 		RETURN
 	END
-	INSERT INTO TITLE(title) VALUES(@the_title)
+	BEGIN TRY
+		INSERT INTO TITLE(title) VALUES(@the_title)
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
 
 GO
@@ -53,5 +75,16 @@ BEGIN
 		;THROW 99001, 'Affiliation cannot be empty', 1;
 		RETURN
 	END
-	INSERT INTO AFFILIATION(affiliation_name) VALUES(@af_name)
+	BEGIN TRY
+		INSERT INTO AFFILIATION(affiliation_name) VALUES(@af_name)
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+	END CATCH;
 END
