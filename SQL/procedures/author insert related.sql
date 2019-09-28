@@ -41,6 +41,7 @@ BEGIN
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
 			ERROR_MESSAGE() AS ErrorMessage;
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
 
@@ -78,6 +79,7 @@ BEGIN
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
 			ERROR_MESSAGE() AS ErrorMessage;
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
 
@@ -114,5 +116,6 @@ BEGIN
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
 			ERROR_MESSAGE() AS ErrorMessage;
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
