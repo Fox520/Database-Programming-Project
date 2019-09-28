@@ -72,7 +72,7 @@ BEGIN
 			ERROR_SEVERITY() AS ErrorSeverity,
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
-			ERROR_MESSAGE() AS ErrorMessage;
+			ERROR_MESSAGE() AS ErrorMessage
 		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
@@ -115,7 +115,7 @@ BEGIN
 			ERROR_SEVERITY() AS ErrorSeverity,
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
-			ERROR_MESSAGE() AS ErrorMessage;
+			ERROR_MESSAGE() AS ErrorMessage
 		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
@@ -146,37 +146,7 @@ BEGIN
 			ERROR_SEVERITY() AS ErrorSeverity,
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
-			ERROR_MESSAGE() AS ErrorMessage;
-		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
-	END CATCH;
-END
-
-GO
-CREATE PROCEDURE spAddFile
-@file_path VARCHAR(100),
-@file_id INT OUTPUT
-AS
-BEGIN
-	SET NOCOUNT ON
-	BEGIN TRY
-		IF @file_path IS NULL OR @file_path = ''
-		BEGIN
-			;THROW 99001, 'File path cannot be empty', 1;
-			RETURN
-		END
-	
-		insert into FILES(file_path) values(@file_path)
-		SET @file_id = SCOPE_IDENTITY()
-		SELECT @file_id
-	END TRY
-	BEGIN CATCH
-		SELECT
-			ERROR_NUMBER() AS ErrorNumber,
-			ERROR_STATE() AS ErrorState,
-			ERROR_SEVERITY() AS ErrorSeverity,
-			ERROR_PROCEDURE() AS ErrorProcedure,
-			ERROR_LINE() AS ErrorLine,
-			ERROR_MESSAGE() AS ErrorMessage;
+			ERROR_MESSAGE() AS ErrorMessage
 		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
