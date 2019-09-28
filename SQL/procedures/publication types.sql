@@ -5,12 +5,19 @@ CREATE PROCEDURE spAddConferenceProceedings
 @conf_id INT OUTPUT
 AS
 BEGIN
-	IF @conf_proceedings_title IS NULL or @conf_proceedings_title = ''
-	BEGIN
-		;THROW 99001, 'Provide conference proceedings title', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
+		IF @conf_proceedings_title IS NULL or @conf_proceedings_title = ''
+		BEGIN
+			;THROW 99001, 'Provide conference proceedings title', 1;
+			RETURN
+		END
+		IF EXISTS(SELECT conference_proceedings_title FROM CONFERENCE_PROCEEDING WHERE conference_proceedings_title = @conf_proceedings_title)
+		BEGIN
+			;THROW 99001, 'Conference proceeding already exists', 1;
+			RETURN
+		END
+	
 		insert into CONFERENCE_PROCEEDING(conference_proceedings_title) values(@conf_proceedings_title)
 		SET @conf_id = SCOPE_IDENTITY()
 		SELECT @conf_id
@@ -33,18 +40,26 @@ CREATE PROCEDURE spAddBook
 AS
 BEGIN
 	SET NOCOUNT ON
-	IF @book_title IS NULL or @book_title = ''
-	BEGIN
-		;THROW 99001, 'Provide book title', 1;
-		RETURN
-	END
-
-	IF @edition IS NULL
-	BEGIN
-		;THROW 99001, 'Provide book edition', 1;
-		RETURN
-	END
 	BEGIN TRY
+		IF @book_title IS NULL or @book_title = ''
+		BEGIN
+			;THROW 99001, 'Provide book title', 1;
+			RETURN
+		END
+
+		IF @edition IS NULL
+		BEGIN
+			;THROW 99001, 'Provide book edition', 1;
+			RETURN
+		END
+		-- compare book title and edition
+		-- title can be the same but different edition. therefore allow if edition is different
+		IF EXISTS(SELECT book_title FROM BOOK WHERE book_title = @book_title) AND @edition = (SELECT edition FROM BOOK WHERE book_title = @book_title)
+		BEGIN
+			;THROW 99001, 'Book of this edition already exists', 1;
+			RETURN
+		END
+	
 		insert into BOOK(book_title, edition) values(@book_title, @edition)
 		SET @bk_id = SCOPE_IDENTITY()
 		SELECT @bk_id
@@ -66,18 +81,27 @@ CREATE PROCEDURE spAddJournal
 @journ_id INT OUTPUT
 AS
 BEGIN
-	IF @journal_title IS NULL or @journal_title = ''
-	BEGIN
-		;THROW 99001, 'Provide journal title', 1;
-		RETURN
-	END
-
-	IF @volume IS NULL
-	BEGIN
-		;THROW 99001, 'Provide journal volume', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
+
+		IF @journal_title IS NULL or @journal_title = ''
+		BEGIN
+			;THROW 99001, 'Provide journal title', 1;
+			RETURN
+		END
+
+		IF @volume IS NULL
+		BEGIN
+			;THROW 99001, 'Provide journal volume', 1;
+			RETURN
+		END
+
+		IF EXISTS(SELECT journal_title FROM JOURNAL WHERE journal_title = @journal_title) AND @volume = (SELECT volume FROM JOURNAL WHERE journal_title = @journal_title)
+		BEGIN
+			;THROW 99001, 'Journal of this volume already exists', 1;
+			RETURN
+		END
+	
 		insert into JOURNAL(journal_title, volume) values(@journal_title, @volume)
 		SET @journ_id = SCOPE_IDENTITY()
 		SELECT @journ_id
@@ -95,16 +119,22 @@ END
 
 GO
 CREATE PROCEDURE spAddPublisher
-@publication_name VARCHAR(100)
+@publisher_name VARCHAR(100)
 AS
 BEGIN
-	IF @publication_name IS NULL OR @publication_name = ''
-	BEGIN
-		;THROW 99001, 'Publication cannot be empty', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
-		insert into PUBLISHER(publisher_name) values(@publication_name)
+		IF @publisher_name IS NULL OR @publisher_name = ''
+		BEGIN
+			;THROW 99001, 'Publisher cannot be empty', 1;
+			RETURN
+		END
+		IF EXISTS(SELECT publisher_name FROM PUBLISHER WHERE publisher_name = @publisher_name)
+		BEGIN
+			;THROW 99001, 'Publisher already exists', 1;
+			RETURN
+		END
+		insert into PUBLISHER(publisher_name) values(@publisher_name)
 	END TRY
 	BEGIN CATCH
 		SELECT
@@ -123,12 +153,14 @@ CREATE PROCEDURE spAddFile
 @file_id INT OUTPUT
 AS
 BEGIN
-	IF @file_path IS NULL OR @file_path = ''
-	BEGIN
-		;THROW 99001, 'File path cannot be empty', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
+		IF @file_path IS NULL OR @file_path = ''
+		BEGIN
+			;THROW 99001, 'File path cannot be empty', 1;
+			RETURN
+		END
+	
 		insert into FILES(file_path) values(@file_path)
 		SET @file_id = SCOPE_IDENTITY()
 		SELECT @file_id

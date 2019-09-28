@@ -1,33 +1,36 @@
 USE SchoolProject
 Go
-ALTER PROCEDURE spAddAuthor
-@affiliation_id varchar(100),
-@title_id varchar(4),
+CREATE PROCEDURE spAddAuthor
+@affiliation_id INT,
+@title_id INT,
 @fname varchar(20),
 @lname varchar(20)
 AS
 BEGIN
-	IF @fname IS NULL OR @lname IS NULL OR @fname = '' OR @lname = ''
-	BEGIN
-		;THROW 99001, 'Provide first/last name', 1;
-		RETURN
-	END
-	IF @affiliation_id = ''
-	BEGIN
-		;THROW 99001, 'Provide an affiliation_id, empty', 1;
-		RETURN
-	END
-	IF @affiliation_id IS NULL OR @affiliation_id = ''
-	BEGIN
-		;THROW 99001, 'Provide an affiliation_id', 1;
-		RETURN
-	END
-	IF @title_id IS NULL OR @title_id = ''
-	BEGIN
-		;THROW 99001, 'Provide a title_id', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
+		IF @fname IS NULL OR @lname IS NULL OR @fname = '' OR @lname = ''
+		BEGIN
+			;THROW 99001, 'Provide first/last name', 1;
+			RETURN
+		END
+		
+		IF @affiliation_id IS NULL OR @affiliation_id = ''
+		BEGIN
+			;THROW 99001, 'Provide an affiliation id', 1;
+			RETURN
+		END
+		IF @title_id IS NULL
+		BEGIN
+			;THROW 99001, 'Provide a title id', 1;
+			RETURN
+		END
+		-- make sure only letters
+		IF @fname LIKE '%[0-9]%' OR @lname LIKE '%[0-9]%'
+		BEGIN
+			;THROW 99001, 'Only letters allowed for names', 1;
+			RETURN
+		END
 		insert into AUTHOR(title_id, first_name, last_name, affiliation_id) values( @title_id, @fname, @lname, @affiliation_id)
 	END TRY
 	BEGIN CATCH
@@ -43,15 +46,28 @@ END
 
 GO
 CREATE PROCEDURE spAddTitle
-@the_title VARCHAR(100)
+@the_title VARCHAR(4)
 AS
 BEGIN
-	IF @the_title IS NULL OR @the_title = ''
-	BEGIN
-		;THROW 99001, 'Title cannot be empty', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
+		IF @the_title IS NULL OR @the_title = ''
+		BEGIN
+			;THROW 99001, 'Title cannot be empty', 1;
+			RETURN
+		END
+
+		IF EXISTS(SELECT title FROM TITLE WHERE title = @the_title)
+		BEGIN
+			;THROW 99001, 'Title already exists', 1;
+			RETURN
+		END
+		-- make sure only letters
+		IF @the_title LIKE '%[0-9]%'
+		BEGIN
+			;THROW 99001, 'Only letters allowed', 1;
+			RETURN
+		END
 		INSERT INTO TITLE(title) VALUES(@the_title)
 	END TRY
 	BEGIN CATCH
@@ -70,12 +86,24 @@ CREATE PROCEDURE spAddAffiliation
 @af_name VARCHAR(100)
 AS
 BEGIN
-	IF @af_name IS NULL OR @af_name = ''
-	BEGIN
-		;THROW 99001, 'Affiliation cannot be empty', 1;
-		RETURN
-	END
+	SET NOCOUNT ON
 	BEGIN TRY
+		IF @af_name IS NULL OR @af_name = ''
+		BEGIN
+			;THROW 99001, 'Affiliation cannot be empty', 1;
+			RETURN
+		END
+		IF EXISTS(SELECT affiliation_name FROM AFFILIATION WHERE affiliation_name = @af_name)
+		BEGIN
+			;THROW 99001, 'Affiliation already exists', 1;
+			RETURN
+		END
+		-- make sure only letters
+		IF @af_name LIKE '%[0-9]%'
+		BEGIN
+			;THROW 99001, 'Only letters allowed', 1;
+			RETURN
+		END
 		INSERT INTO AFFILIATION(affiliation_name) VALUES(@af_name)
 	END TRY
 	BEGIN CATCH
