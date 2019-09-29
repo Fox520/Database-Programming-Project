@@ -68,11 +68,11 @@ CREATE PROCEDURE getAuthorsForPublication
 @publication_id INT
 AS
 BEGIN
-    SET NOCOUNT ON
-    BEGIN TRY
-        IF @publication_id IS NULL OR @publication_id = ''
-        BEGIN
-        ;THROW 99001, 'Please provide publication', 1;
+	SET NOCOUNT ON
+	BEGIN TRY
+		IF @publication_id IS NULL OR @publication_id = ''
+		BEGIN
+		;THROW 99001, 'Please provide publication', 1;
 			RETURN
 		END
 	SELECT
@@ -81,21 +81,21 @@ BEGIN
 		AUTHOR.title_id,
 		AUTHOR.first_name,
 		AUTHOR.last_name
-	 FROM Author_Publication_Junction_Table AP
-	
+	FROM Author_Publication_Junction_Table AP
 	JOIN AUTHOR ON AUTHOR.author_id = AP.author_id
+	WHERE AP.publication_id = @publication_id
 
 	FOR XML RAW('author_publication'), ROOT('author_publications'), ELEMENTS
-    END TRY
-    BEGIN CATCH
-      SELECT
+	END TRY
+	BEGIN CATCH
+		SELECT
 			ERROR_NUMBER() AS ErrorNumber,
 			ERROR_STATE() AS ErrorState,
 			ERROR_SEVERITY() AS ErrorSeverity,
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
 			ERROR_MESSAGE() AS ErrorMessage
-      FOR XML RAW('error'), ROOT('errors'), ELEMENTS
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH
 END
 GO
