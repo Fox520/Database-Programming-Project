@@ -32,10 +32,28 @@ GO
 
 CREATE PROCEDURE getAllPublications
 AS
-SELECT * FROM Publication
-FOR XML RAW('publication'), ROOT('publications'), ELEMENTS
-GO
+BEGIN
+	SET NOCOUNT ON;
+	SELECT
+		PUBLICATION.publication_id,
+		CITY.city_name,
+		FILES.file_path,
+		PUBLISHER.publisher_name,
+		BOOK.book_title,
+		BOOK.edition,
+		CONFERENCE_PROCEEDING.conference_proceedings_title,
+		PUBLICATION.abstract,
+		PUBLICATION.date_of_publication
+	FROM Publication
+	JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
+	JOIN CITY ON PUBLICATION.city_id = CITY.city_id
+	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
+	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
+	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
+	JOIN CONFERENCE_PROCEEDING ON PUBLICATION.conference_proceedings_id = CONFERENCE_PROCEEDING.conference_proceedings_id
 
+	FOR XML RAW('publication'), ROOT('publications'), ELEMENTS
+END
 -- get authors for a certain publication
 
 CREATE PROCEDURE getAuthorsForPublication
