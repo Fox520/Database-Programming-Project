@@ -35,40 +35,57 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	SELECT
+
 		PUBLICATION.publication_id,
 		CITY.city_name,
 		FILES.file_path,
 		PUBLISHER.publisher_name,
+		BOOK.book_id,
 		BOOK.book_title,
 		BOOK.edition,
-		CONFERENCE_PROCEEDING.conference_proceedings_title,
+		CONF.conference_proceedings_id,
+		CONF.conference_proceedings_title,
+		JOURNAL.journal_id,
+		JOURNAL.journal_title,
+		JOURNAL.volume,
 		PUBLICATION.abstract,
 		PUBLICATION.date_of_publication
+
 	FROM Publication
 	JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
 	JOIN CITY ON PUBLICATION.city_id = CITY.city_id
 	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
 	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
 	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
-	JOIN CONFERENCE_PROCEEDING ON PUBLICATION.conference_proceedings_id = CONFERENCE_PROCEEDING.conference_proceedings_id
+	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONFERENCE_PROCEEDING.conference_proceedings_id
 
 	FOR XML RAW('publication'), ROOT('publications'), ELEMENTS
 END
+GO
 -- get authors for a certain publication
 
 CREATE PROCEDURE getAuthorsForPublication
-@author_name nvarchar(30)
+@publication_id INT
 AS
 BEGIN
     SET NOCOUNT ON
     BEGIN TRY
-        IF @auther_id IS NULL OR @author_name = ''
+        IF @publication_id IS NULL OR @publication_id = ''
         BEGIN
-        ;THROW 99001, 'Please provide author', 1;
+        ;THROW 99001, 'Please provide publication', 1;
 			RETURN
 		END
-SELECT * FROM Author_Publication_Junction_Table WHERE author_name = @author_name
-FOR XML RAW('author_publication'), ROOT('author_publications'), ELEMENTS
+	SELECT
+		AUTHOR.author_id,
+		AUTHOR.affiliation_id,
+		AUTHOR.title_id,
+		AUTHOR.first_name,
+		AUTHOR.last_name
+	 FROM Author_Publication_Junction_Table AP
+	
+	JOIN AUTHOR ON AUTHOR.author_id = AP.author_id
+
+	FOR XML RAW('author_publication'), ROOT('author_publications'), ELEMENTS
     END TRY
     BEGIN CATCH
       SELECT
@@ -77,9 +94,9 @@ FOR XML RAW('author_publication'), ROOT('author_publications'), ELEMENTS
 			ERROR_SEVERITY() AS ErrorSeverity,
 			ERROR_PROCEDURE() AS ErrorProcedure,
 			ERROR_LINE() AS ErrorLine,
-			ERROR_MESSAGE() AS ErrorMessage;
+			ERROR_MESSAGE() AS ErrorMessage
       FOR XML RAW('error'), ROOT('errors'), ELEMENTS
-
+	END CATCH
 END
 GO
 
