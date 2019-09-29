@@ -39,10 +39,30 @@ GO
 -- get authors for a certain publication
 
 CREATE PROCEDURE getAuthorsForPublication
-@Author_id nvarchar(30)
+@author_name nvarchar(30)
 AS
-SELECT * FROM Author_Publication_Junction_Table WHERE author_id = @Author_id
+BEGIN
+    SET NOCOUNT ON
+    BEGIN TRY
+        IF @auther_id IS NULL OR @author_name = ''
+        BEGIN
+        ;THROW 99001, 'Please provide author', 1;
+			RETURN
+		END
+SELECT * FROM Author_Publication_Junction_Table WHERE author_name = @author_name
 FOR XML RAW('author_publication'), ROOT('author_publications'), ELEMENTS
+    END TRY
+    BEGIN CATCH
+      SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage;
+      FOR XML RAW('error'), ROOT('errors'), ELEMENTS
+
+END
 GO
 
 -- get publications from certain city
