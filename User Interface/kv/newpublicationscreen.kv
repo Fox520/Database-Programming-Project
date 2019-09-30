@@ -49,7 +49,8 @@
 
             MDTextField:
                 id: custom_publisher
-                hint_text: "publisher if not listed"
+                hint_text: "publisher"
+                disabled: True
             MDTextField:
                 id: book_title
                 disabled: True
@@ -73,7 +74,6 @@
 
 
             MDRaisedButton:
-#                id: main_button_city
                 text: "Select city"
                 on_release:
                     root.set_menu_for_city()
@@ -83,7 +83,8 @@
                     root.instance_menu_city.open(self)
             MDTextField:
                 id: custom_city
-                hint_text: "city if not listed"
+                hint_text: "city"
+                disabled: True
 
             MDRaisedButton:
                 text: "Choose date of publication"
@@ -92,6 +93,7 @@
             MDTextField:
                 id: date_of_publication
                 hint_text: "YYYY-MM-DD"
+                disabled: True
 
             MDRaisedButton:
                 id: main_button_upload
@@ -105,3 +107,5 @@
                 hint_text: "Abstract"
             Button:
                 text: "submit"
+                on_release:
+                    root.submit()

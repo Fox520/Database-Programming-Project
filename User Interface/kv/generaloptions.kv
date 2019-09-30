@@ -79,22 +79,14 @@
                 Button:
                     text: "Add new publisher to the system"
                     on_release:
-                        root.set_menu_for_publisher("insert")
-                        root.instance_menu_publisher = MDDropdownMenu(\
-                        items=root.menu_for_pb, \
-                        max_height=dp(260), width_mult=4)
-                        root.instance_menu_publisher.open(self)
+                        root.show_input_dialog(input_type="new_publisher", the_title="Add new publisher")
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
                     text: "Add new city to the system"
                     on_release:
-                        root.set_menu_for_city("insert")
-                        root.instance_menu_city = MDDropdownMenu(\
-                        items=root.menu_for_ct, \
-                        max_height=dp(260), width_mult=4)
-                        root.instance_menu_city.open(self)
+                        root.show_input_dialog(input_type="new_city", the_title="Add new city")
             Magnet:
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1

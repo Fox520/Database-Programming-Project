@@ -145,13 +145,11 @@ class NewPublicationScreen(Screen):
         self.custom_upload = self.ids["custom_upload"]
         self.custom_authors = self.ids["custom_authors"]
         # City
-        self.menu_for_city = ["Oshakati", "Ongwediva",
-                              "Ondangwa"]
+        self.menu_for_city = []
         self.instance_menu_city = None
         self.menu_for_ct = []
         # Publisher
-        self.menu_for_publisher = ["MacMillan", "Zebra",
-                                   "New Day"]
+        self.menu_for_publisher = []
         self.instance_menu_publisher = None
         self.menu_for_pb = []
 
@@ -162,8 +160,7 @@ class NewPublicationScreen(Screen):
         self.menu_for_pt = []
 
         # Authors
-        self.menu_for_authors = ["Steve", "John",
-                                 "Doe"]
+        self.menu_for_authors = []
         self.instance_menu_authors = None
         self.menu_for_au = []
         self.main_button_author = self.ids["main_button_author"]
@@ -174,6 +171,29 @@ class NewPublicationScreen(Screen):
         self.journal_title = self.ids["journal_title"]
         self.volume = self.ids["volume"]
         self.conf_title = self.ids["conf_title"]
+
+    def on_enter(self, *args):
+        self.setup_authors()
+        self.setup_city()
+        self.setup_publisher()
+
+    def setup_authors(self):
+        self.author_dictionary = database_interface.get_authors()
+        if len(self.author_dictionary) > 0:
+            for k, v in self.author_dictionary.items():
+                self.menu_for_authors.append(k)
+
+    def setup_city(self):
+        self.city_dictionary = database_interface.get_cities()
+        if len(self.city_dictionary) > 0:
+            for k, v in self.city_dictionary.items():
+                self.menu_for_city.append(k)
+
+    def setup_publisher(self):
+        self.publisher_dictionary = database_interface.get_publishers()
+        if len(self.publisher_dictionary) > 0:
+            for k, v in self.publisher_dictionary.items():
+                self.menu_for_publisher.append(k)
 
     def set_menu_for_city(self):
         # reset menu_for_author_titles and get from db
@@ -279,6 +299,9 @@ class NewPublicationScreen(Screen):
 
         self.instance_menu_authors.dismiss()
 
+    def submit(self):
+        toast("TODO")
+
     def set_date_of_publication(self, date_obj):
         self.date_of_publication.text = str(date_obj)
 
@@ -374,7 +397,7 @@ class GeneralAuthorOptions(Screen):
 
     def on_back_pressed(self):
         UserInterface().change_screen("home_screen")
-        UserInterface().manage_screens("general_options_screen", "remove")
+        UserInterface().manage_screens("general_author_options_screen", "remove")
 
 
 class GeneralPublicationOptions(Screen):
@@ -431,6 +454,31 @@ class GeneralPublicationOptions(Screen):
     def chosen_city(self, x, action):
         print(x, action)
         self.instance_menu_city.dismiss()
+
+    def show_input_dialog(self, input_type="", the_title=""):
+
+        if input_type == "new_publisher":
+            the_callback = self.callback_for_add_publisher
+        elif input_type == "new_city":
+            the_callback = self.callback_for_add_city
+
+        dialog = MDInputDialog(
+            title=the_title, size_hint=(.4, .4),
+            text_button_ok='Accept',
+            events_callback=the_callback)
+        dialog.open()
+
+    def callback_for_add_publisher(self, *args):
+        output = database_interface.add_publisher(args[1].text_field.text)
+        toast(output)
+
+    def callback_for_add_city(self, *args):
+        output = database_interface.add_city(args[1].text_field.text)
+        toast(output)
+
+    def on_back_pressed(self):
+        UserInterface().change_screen("home_screen")
+        UserInterface().manage_screens("general_publication_options_screen", "remove")
 
 
 class HomeScreen(Screen):
