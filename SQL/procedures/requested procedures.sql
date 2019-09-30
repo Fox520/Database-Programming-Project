@@ -104,7 +104,7 @@ GO
 -- get publications from certain city
 
 CREATE PROCEDURE getAllPublicationsForCity
-@City_id nvarchar(30)
+@City_id int
 AS
 SELECT * FROM Publication WHERE city_id = @City_id
 FOR XML RAW('publication_city'), ROOT('publication_cities'), ELEMENTS
@@ -113,7 +113,7 @@ GO
 -- get publications from certain publishers
 
 CREATE PROCEDURE getPublicationsForPublisher
-@publisher_id nvarchar(30)
+@publisher_id int
 AS
 SELECT * FROM Publication WHERE publication_id = @publisher_id
 FOR XML RAW('publication_publisher'), ROOT('publication_publishers'), ELEMENTS

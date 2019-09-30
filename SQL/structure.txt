@@ -1,0 +1,65 @@
+setup pub others.sql
+spAddPublisher
+	publisher_name
+spAddCity
+	city_name
+spUpdateCity
+	city_name
+spUpdatePublisher
+	publisher_name
+spDeletePublisher
+	publisher_name
+spDeleteCity
+	delete_city
+spDeletePublication
+	publication_id
+
+add pub.sql
+spAddFile
+	file_path
+	file_id
+spAddPublication
+	book_id
+	journal_id
+	conf..id
+	city_id
+	publisher_id
+	date_of_pub
+	abstract
+
+set author related.sql
+spAddAuthor
+	affiliation_id
+	title_id
+	fname
+	lname
+spAddTitle
+	the_title
+spAddAffiliation
+	af_name
+
+modify auth related.sql
+updateAuthorNames
+	authorID
+	authorFirstName
+	authorLastName
+updateAffiliation
+	af_id
+	af_name
+deleteAffiliation
+	af_id
+deleteAuthor
+	authorID
+
+req procedures.sql
+spGetAllAuthorsInformation
+getAllAffiliations
+getAllTitles
+getAllPublications
+getAuthorsForPublication
+	publication_id
+MODIFY Below
+getAllPublicationsForCity
+	city_id
+getPublicationsForPublisher
+	publisher_id
