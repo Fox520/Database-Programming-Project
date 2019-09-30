@@ -58,7 +58,6 @@ getAllTitles
 getAllPublications
 getAuthorsForPublication
 	publication_id
-MODIFY Below
 getAllPublicationsForCity
 	city_id
 getPublicationsForPublisher
