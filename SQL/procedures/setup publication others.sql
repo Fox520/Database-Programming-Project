@@ -462,3 +462,38 @@ BEGIN
 		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
 END
+GO
+CREATE PROCEDURE spCombineAuthorPublicationJunction
+@author_id INT,
+@publication_id INT
+AS
+BEGIN
+	BEGIN TRY
+		IF @publication_id IS NULL OR @publication_id  = '' OR @author_id IS NULL OR @author_id = ''
+		BEGIN
+			;THROW 99001, 'Provide all information', 1;
+			RETURN
+		END
+		IF EXISTS(SELECT publication_id FROM PUBLICATION WHERE publication_id = @publication_id)
+		BEGIN
+			;THROW 99001, 'Publication not found', 1;
+			RETURN
+		END
+		IF EXISTS(SELECT author_id FROM AUTHOR WHERE author_id = @author_id)
+		BEGIN
+			;THROW 99001, 'Author not found', 1;
+			RETURN
+		END
+		INSERT INTO Author_Publication_Junction_Table(author_id, publication_id) VALUES(@author_id, @publication_id)
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
+	END CATCH
+END
