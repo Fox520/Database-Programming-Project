@@ -448,7 +448,8 @@ BEGIN
 		END
 		insert into PUBLICATION(book_id, journal_id, conference_proceedings_id, city_id, publisher_id, file_path_id, date_of_publication, abstract)
 		values(@book_id, @journal_id, @conference_proceedings_id, @city_id, @publisher_id, @file_path_id, @date_of_publication, @abstract)
-		-- SELECT 'Successfully added publication'
+		SELECT SCOPE_IDENTITY()
+		FOR XML RAW('publication_id'), ROOT('publication_ids'), ELEMENTS
 	END TRY
 	BEGIN CATCH
 		SELECT

@@ -10,7 +10,7 @@ spUpdatePublisher
 spDeletePublisher
 	publisher_name
 spDeleteCity
-	delete_city
+	city_name
 spDeletePublication
 	publication_id
 
