@@ -58,7 +58,7 @@ BEGIN
 	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
 	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
 	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
-	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONFERENCE_PROCEEDING.conference_proceedings_id
+	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
 
 	FOR XML RAW('publication'), ROOT('publications'), ELEMENTS
 END
@@ -104,10 +104,38 @@ GO
 -- get publications from certain city
 
 CREATE PROCEDURE getAllPublicationsForCity
-@City_id int
+@city_id int
 AS
-SELECT * FROM Publication WHERE city_id = @City_id
-FOR XML RAW('publication_city'), ROOT('publication_cities'), ELEMENTS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT
+
+		PUBLICATION.publication_id,
+		CITY.city_name,
+		FILES.file_path,
+		PUBLISHER.publisher_name,
+		BOOK.book_id,
+		BOOK.book_title,
+		BOOK.edition,
+		CONF.conference_proceedings_id,
+		CONF.conference_proceedings_title,
+		JOURNAL.journal_id,
+		JOURNAL.journal_title,
+		JOURNAL.volume,
+		PUBLICATION.abstract,
+		PUBLICATION.date_of_publication
+
+	FROM Publication
+	JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
+	JOIN CITY ON PUBLICATION.city_id = CITY.city_id
+	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
+	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
+	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
+	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
+	WHERE CITY.city_id = @city_id
+
+	FOR XML RAW('publication_city'), ROOT('publication_cities'), ELEMENTS
+END
 GO
 
 -- get publications from certain publishers
@@ -115,6 +143,55 @@ GO
 CREATE PROCEDURE getPublicationsForPublisher
 @publisher_id int
 AS
-SELECT * FROM Publication WHERE publication_id = @publisher_id
-FOR XML RAW('publication_publisher'), ROOT('publication_publishers'), ELEMENTS
-GO
+BEGIN
+	BEGIN TRY
+	SET NOCOUNT ON;
+	IF @publisher_id IS NULL OR @publisher_id = ''
+		BEGIN
+		;THROW 99001, 'Please provide publisher', 1;
+			RETURN
+		END
+	IF NOT EXISTS(SELECT publisher_id FROM PUBLISHER WHERE publisher_id = @publisher_id)
+		BEGIN
+			;THROW 99001, 'Publisher not found', 1;
+			RETURN
+		END
+	
+	SELECT
+		PUBLICATION.publication_id,
+		CITY.city_name,
+		FILES.file_path,
+		PUBLISHER.publisher_name,
+		BOOK.book_id,
+		BOOK.book_title,
+		BOOK.edition,
+		CONF.conference_proceedings_id,
+		CONF.conference_proceedings_title,
+		JOURNAL.journal_id,
+		JOURNAL.journal_title,
+		JOURNAL.volume,
+		PUBLICATION.abstract,
+		PUBLICATION.date_of_publication
+
+	FROM Publication
+	JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
+	JOIN CITY ON PUBLICATION.city_id = CITY.city_id
+	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
+	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
+	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
+	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
+	WHERE PUBLISHER.publisher_id = @publisher_id
+
+	FOR XML RAW('publication_publisher'), ROOT('publication_publishers'), ELEMENTS
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
+	END CATCH
+END
