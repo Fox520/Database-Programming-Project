@@ -1,14 +1,16 @@
-CREATE TABLE AUDIT_Publication(
+CREATE TABLE AUDIT_CITY(
 	id INT IDENTITY PRIMARY KEY,
-	publication_id INT,
+	city_id INT,
+	city_name varchar(50),
 	dateChange DATETIME,
 	userResponsible varchar(100),
 	actionPerformed varchar(50)
 )
 
-CREATE TABLE AUDIT_Author(
+CREATE TABLE AUDIT_AFFILIATION(
 	id INT IDENTITY PRIMARY KEY,
-	author_id INT,
+	affiliation_id INT,
+	affiliation_name varchar(100),
 	dateChange DATETIME,
 	userResponsible varchar(100),
 	actionPerformed varchar(50)
