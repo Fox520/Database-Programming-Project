@@ -62,3 +62,16 @@ getAllPublicationsForCity
 	city_id
 getPublicationsForPublisher
 	publisher_id
+
+set pubcation types
+spAddConferenceProceedings
+	conf_pros..title
+	conf_id OUT
+spAddBook
+	book_title
+	edition
+	bk_id OUT
+spAddJournal
+	journal_title
+	volume
+	journ_id OUT
