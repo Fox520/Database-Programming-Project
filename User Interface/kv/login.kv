@@ -1,0 +1,48 @@
+<LoginScreen>:
+    GridLayout:
+        rows: 2
+        MDToolbar:
+            id: toolbar
+            title: "Login In"
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+
+        GridLayout:
+            rows: 2
+            orientation: 'vertical'
+            padding: [10,50,10,50]
+            BoxLayout:
+                orientation: "vertical"
+                MDLabel:
+                    font_name: "Cursive"
+                    text: "Welcome"
+                    halign: "center"
+                    font_size: sp(100)
+            GridLayout:
+                cols: 1
+                orientation: "vertical"
+                padding: [20,0,20,0]
+                spacing: 10
+                MDTextField:
+                    id: username
+                    hint_text: "Username"
+                    multiline: False
+                    write_tab: False
+
+                MDTextField:
+                    id: pwd
+                    hint_text: "Password"
+                    multiline: False
+                    write_tab: False
+                    password: True
+
+                GridLayout:
+                    cols: 3
+                    Widget:
+                    MDRaisedButton:
+                        text:"Proceed"
+                        on_release:
+                            root.login_attempt(username.text, pwd.text)
+                    Widget:

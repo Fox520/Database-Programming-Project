@@ -1,9 +1,14 @@
+# TODO: create a stored procedure to get the publication id
+#       since now SCOPE_IDENTITY is unreliable
+#       later work on getting and listing the publications
+
 # -*- coding: utf-8 -*-
 # encoding=utf-8
 import functools
 import os
 import traceback
 
+from kivy.core.text import LabelBase
 from kivy.uix.popup import Popup
 
 from sqlops import SqlInterface
@@ -14,8 +19,9 @@ from kivy.metrics import dp
 
 from kivy.properties import ListProperty
 from kivy.uix.modalview import ModalView
+from kivy.utils import get_hex_from_color
 from kivy.uix.screenmanager import Screen, ScreenManager, SwapTransition
-from kivymd.uix.dialog import MDInputDialog
+from kivymd.uix.dialog import MDInputDialog, MDDialog
 
 from kivymd.uix.card import MDCard
 
@@ -29,12 +35,27 @@ Config.set('graphics', 'multisamples', '0')
 
 database_interface = SqlInterface()
 
+credentials = {"admin": "123"}
+
+def initialize_fonts():
+    kivy_fonts = [
+        {
+            "name": "Cursive",
+            "fn_regular": "cursive.ttf"
+        }
+    ]
+
+    for font in kivy_fonts:
+        LabelBase.register(**font)
+
+
 Builder.load_string("""
 #:include kv/homescreen.kv
 #:include kv/newpublicationscreen.kv
 #:include kv/addauthor.kv
 #:include kv/listpublication.kv
 #:include kv/generaloptions.kv
+#:include kv/login.kv
 
 #:import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
 #:import MDDatePicker   kivymd.uix.picker.MDDatePicker
@@ -46,6 +67,19 @@ Builder.load_string("""
 class ItemList(MDCard):
     def prepare_viewing_of_publication(self):
         print(self.publication_id)
+
+
+class LoginScreen(Screen):
+    def __init__(self, **kwargs):
+        super(LoginScreen, self).__init__(**kwargs)
+
+    def login_attempt(self, username, password):
+        if credentials.get(username, None) == password:
+            UserInterface().manage_screens("home_screen", "add")
+            UserInterface().change_screen("home_screen")
+            UserInterface().manage_screens("login_screen", "remove")
+        else:
+            toast("login unsuccessful")
 
 
 class AddAuthorScreen(Screen):
@@ -287,6 +321,7 @@ class NewPublicationScreen(Screen):
                     "on_release": lambda x=name_item: self.chosen_author(x),
                 }
             )
+
     def get_author_id_from_dict(self, name):
         try:
             return self.author_dictionary[name]
@@ -360,18 +395,16 @@ class NewPublicationScreen(Screen):
                 if can_proceed[1] == "book":
                     publication_id = database_interface.add_publication(book_id=bk_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
                 elif can_proceed[1] == "conf":
-                    publication_id = database_interface.add_publication(book_id=conf_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                    publication_id = database_interface.add_publication(conf_id=conf_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
                 elif can_proceed[1] == "journal":
-                    publication_id = database_interface.add_publication(book_id=journal_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
-                # print("publication id:", publication_id)
-                # print("before converting:", type(publication_id))
-                # publication_id = int(publication_id)
-                # print("after converting:", type(publication_id))
+                    publication_id = database_interface.add_publication(journal_id=journal_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+
                 if publication_id is not None:
-                    print("before junction:", publication_id)
-                    publication_id = publication_id
+                    #publication_id = publication_id
+                    print(publication_id)
                     output = database_interface.add_author_publication_junction(self.get_author_id_from_dict(author_name), publication_id)
                     toast(output)
+                    print(output)
                 else:
                     print("publication id is none")
             else:
@@ -498,62 +531,112 @@ class GeneralPublicationOptions(Screen):
 
     def setup_publisher(self):
         self.publisher_dictionary = database_interface.get_publishers()
+        self.menu_for_publisher = []
         if len(self.publisher_dictionary) > 0:
             for k, v in self.publisher_dictionary.items():
                 self.menu_for_publisher.append(k)
 
     def setup_city(self):
         self.city_dictionary = database_interface.get_cities()
+        self.menu_for_city = []
         if len(self.city_dictionary) > 0:
             for k, v in self.city_dictionary.items():
                 self.menu_for_city.append(k)
 
-    def set_menu_for_publisher(self, action):
-        # reset menu_for_author_titles and get from db
-        if len(self.menu_for_publisher) < 1:
-            return
-        self.menu_for_pb = []
-        for name_item in self.menu_for_publisher:
-            self.menu_for_pb.append(
-                {
-                    "viewclass": "OneLineListItem",
-                    "text": name_item,
-                    "on_release": functools.partial(self.chosen_publisher, name_item, action),
-                }
-            )
+    def set_menu(self, action, menu_owner):
+        if menu_owner == "publisher":
+            # reset menu_for_author_titles and get from db
+            if len(self.menu_for_publisher) < 1:
+                return
+            self.menu_for_pb = []
+            for name_item in self.menu_for_publisher:
+                self.menu_for_pb.append(
+                    {
+                        "viewclass": "OneLineListItem",
+                        "text": name_item,
+                        "on_release": functools.partial(self.chosen_publisher, name_item, action),
+                    }
+                )
+        elif menu_owner == "city":
+            if len(self.menu_for_city) < 1:
+                return
+            self.menu_for_ct = []
+            for name_item in self.menu_for_city:
+                self.menu_for_ct.append(
+                    {
+                        "viewclass": "OneLineListItem",
+                        "text": name_item,
+                        "on_release": functools.partial(self.chosen_city, name_item, action),
+                    }
+                )
 
     def chosen_publisher(self, x, action):
-        print(x, action)
+        # print(x, action)
         if action == "update":
             dialog = MDInputDialog(
-                title='Rename'+ x, size_hint=(.4, .4),
+                title='Rename ' + x, size_hint=(.4, .4),
                 text_button_ok="confirm",
-                events_callback=self.callback_rename)
+                events_callback=functools.partial(self.callback_various, x, "update_publisher"))
             dialog.open()
+        elif action == "delete":
+            self.delete_dialog(x, "delete_publisher")
         self.instance_menu_publisher.dismiss()
 
-    def callback_rename(self, *args):
-        database_interface.update_publisher(args[1].text_field.text)
+    def callback_various(self, old_name, which_update, text_btn_label, dialog_widget):
+        if which_update == "update_publisher":
+            response = database_interface.update_publisher(old_name, dialog_widget.text_field.text)
+            if response[1]:
+                self.setup_publisher()
+            toast(response[0])
+        elif which_update == "update_city":
+            response = database_interface.update_city(old_name, dialog_widget.text_field.text)
+            if response[1]:
+                self.setup_city()
+            toast(response[0])
 
-    def set_menu_for_city(self, action):
-        if len(self.menu_for_city) < 1:
-            return
-        self.menu_for_ct = []
-        for name_item in self.menu_for_city:
-            self.menu_for_ct.append(
-                {
-                    "viewclass": "OneLineListItem",
-                    "text": name_item,
-                    "on_release": functools.partial(self.chosen_city, name_item, action),
-                }
-            )
+        elif which_update == "delete_city":
+            self.delete_dialog(old_name, "delete_city")
+        elif which_update == "delete_publisher":
+            self.delete_dialog(old_name, "delete_publisher")
+        else:
+            print("don't know what to update")
+
+    def delete_dialog(self, name_to_delete, delete_type):
+        extension = "City" if delete_type == "delete_city" else "Publisher"
+        dialog = MDDialog(
+            title='Delete ' + extension, size_hint=(.8, .3), text_button_ok='Yes',
+            text=f"Are you sure want to delete [color=#DB4437][b]{name_to_delete}[/b][/color]?",
+            text_button_cancel='Cancel',
+            events_callback=functools.partial(self.callback_delete, name_to_delete, delete_type))
+        dialog.open()
+
+    def callback_delete(self, name_to_delete, delete_type, *args):
+        if args[0] == "Yes":
+            if delete_type == "delete_publisher":
+                response = database_interface.delete_publisher(name_to_delete)
+                if response[1]:
+                    self.setup_publisher()
+                toast(response[0])
+            elif delete_type == "delete_city":
+                response = database_interface.delete_city(name_to_delete)
+                if response[1]:
+                    self.setup_city()
+                toast(response[0])
 
     def chosen_city(self, x, action):
-        print(x, action)
+        # print(x, action)
+        if action == "update":
+            dialog = MDInputDialog(
+                title='Rename ' + x, size_hint=(.4, .4),
+                text_button_ok="confirm",
+                events_callback=functools.partial(self.callback_various, x, "update_city"))
+            dialog.open()
+        elif action == "delete":
+            self.delete_dialog(x, "delete_city")
         self.instance_menu_city.dismiss()
 
     def show_input_dialog(self, input_type="", the_title=""):
-
+        the_callback = None
         if input_type == "new_publisher":
             the_callback = self.callback_for_add_publisher
         elif input_type == "new_city":
@@ -567,10 +650,16 @@ class GeneralPublicationOptions(Screen):
 
     def callback_for_add_publisher(self, *args):
         output = database_interface.add_publisher(args[1].text_field.text)
+        # only update dictionary if change occurred
+        if output[1]:
+            self.setup_publisher()
         toast(output)
 
     def callback_for_add_city(self, *args):
         output = database_interface.add_city(args[1].text_field.text)
+        # only update dictionary if change occurred
+        if output[1]:
+            self.setup_city()
         toast(output)
 
     def on_back_pressed(self):
@@ -599,8 +688,10 @@ class UserInterface(App):
             print("Screen [" + screen_name + "] does not exist.")
 
     def manage_screens(self, screen_name, action):
+        # register screens
         scns = {
             "home_screen": HomeScreen,
+            "login_screen": LoginScreen,
             "new_publication_screen": NewPublicationScreen,
             "add_author_screen": AddAuthorScreen,
             "list_publication_screen": ListPublicationScreen,
@@ -622,18 +713,12 @@ class UserInterface(App):
                     # print("Screen ["+screen_name+"] added")
         except:
             print(traceback.format_exc())
-            print("Traceback ^.^")
-
-    def change_screen(self, sc):
-        # centralize screen changing
-        sm.current = sc
 
     def build(self):
         global sm
         self.bind(on_start=self.post_build_init)
         sm = ScreenManager(transition=SwapTransition())
-        sm.add_widget(HomeScreen(name="home_screen"))
-        # sm.add_widget(AddAuthorScreen(name="add_author_screen"))
+        sm.add_widget(LoginScreen(name="login_screen"))
         return sm
 
     def post_build_init(self, ev):
