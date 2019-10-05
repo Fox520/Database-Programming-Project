@@ -11,7 +11,7 @@ class SqlInterface:
         self.conn = pyodbc.connect('DSN=projectile;'
                                    'Trusted_Connection=yes;'
                                    'Database=SchoolProject;',
-                                   autocommit=False)
+                                   autocommit=True)
 
     def add_title(self, t):
         sql = """
@@ -91,8 +91,10 @@ class SqlInterface:
                         for element in child:
                             if element.tag == "ErrorMessage":
                                 return element.text
-        except Exception as e:
-            print(e)
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
     def get_authors(self):
         sql = """
@@ -164,9 +166,6 @@ class SqlInterface:
             title_dict[pair[1]] = pair[0]
         return title_dict
 
-    def get_publications(self):
-        pass
-
     def add_publisher(self, publisher_name):
         sql = """
               DECLARE @return_value int
@@ -236,18 +235,18 @@ class SqlInterface:
         str_xml = rows[0][0]
         try:
             if isinstance(str_xml, int):
-                print("Successfully added author")
                 return str_xml
             else:
                 tree = et.fromstring(str_xml)
-                # print(tree.tag)
                 if tree.tag == "errors":
                     for child in tree.getchildren():
                         for element in child:
                             if element.tag == "ErrorMessage":
                                 return element.text
-        except Exception as e:
-            print(e)
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
     def add_journal(self, journal_title, volume):
         sql = """
@@ -271,8 +270,10 @@ class SqlInterface:
                         for element in child:
                             if element.tag == "ErrorMessage":
                                 return element.text
-        except Exception as e:
-            print(e)
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
     def add_conf_proceeding(self, conf_title):
         sql = """
@@ -296,8 +297,10 @@ class SqlInterface:
                         for element in child:
                             if element.tag == "ErrorMessage":
                                 return element.text
-        except Exception as e:
-            print(e)
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
     def add_publication(self, book_id=None, journal_id=None, conf_id=None, city_id=None, publisher_id=None, date_of_pub=None, abstract=None, file_path=None):
         sql = """
@@ -320,7 +323,6 @@ class SqlInterface:
         crsr = self.conn.cursor()
         crsr.execute(sql, params)
         rows = crsr.fetchall()
-        print(rows)
         # https://github.com/mkleehammer/pyodbc/issues/424
         self.conn.commit()
         try:
@@ -338,12 +340,12 @@ class SqlInterface:
                                 return element.text
 
             except:
-                print(str_xml)
-                print("returning  ...")
                 return str_xml
 
-        except Exception as e:
-            traceback.format_exc()
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
     def add_author_publication_junction(self, author_id, publication_id):
         sql = """
@@ -356,12 +358,10 @@ class SqlInterface:
         crsr.execute(sql, params)
         rows = crsr.fetchall()
         self.conn.commit()
-        # print(rows)
         str_xml = rows[0][0]
-        # print("at junction:", str_xml)
         try:
             if str_xml is None:
-                return "successfully added publication"
+                return "Successfully added publication"
             else:
                 tree = et.fromstring(str_xml)
                 if tree.tag == "errors":
@@ -369,34 +369,145 @@ class SqlInterface:
                         for element in child:
                             if element.tag == "ErrorMessage":
                                 return element.text
-        except Exception as e:
-            print(e)
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
-    def update_publisher(self, new_name):
+    def update_publisher(self, old_name, new_name):
         sql = """
-                    DECLARE @return_value int
-                    EXEC spUpdatePublisher @publisher_name=?
-                    SELECT @return_value as 'Return Value'
-                    """
-        params = (new_name,)
+                DECLARE @return_value int
+                EXEC spUpdatePublisher @publisher_name=?, @old_publisher_name=?
+                SELECT @return_value as 'Return Value'
+                """
+        params = (new_name, old_name)
         crsr = self.conn.cursor()
         crsr.execute(sql, params)
         rows = crsr.fetchall()
         self.conn.commit()
         str_xml = rows[0][0]
         try:
-            if isinstance(str_xml, int):
-                print("Successfully updated publisher")
-                return str_xml
+            if str_xml is None:
+                return "Successfully updated publisher", True
             else:
                 tree = et.fromstring(str_xml)
-                # print(tree.tag)
                 if tree.tag == "errors":
                     for child in tree.getchildren():
                         for element in child:
                             if element.tag == "ErrorMessage":
-                                return element.text
-        except Exception as e:
-            print(e)
+                                return element.text, False
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
 
-        #spUpdateCity
+    def update_city(self, old_name, new_name):
+        sql = """
+                DECLARE @return_value int
+                EXEC spUpdateCity @city_name=?, @old_city_name=?
+                SELECT @return_value as 'Return Value'
+                """
+        params = (new_name, old_name)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if str_xml is None:
+                return "Successfully updated city", True
+            else:
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text, False
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
+
+    def delete_city(self, city_name):
+        sql = """
+            DECLARE @return_value int
+            EXEC @return_value = spDeleteCity @city_name =?
+            SELECT @return_value as 'Return Value'
+            """
+        crsr = self.conn.cursor()
+        params = (city_name,)
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if str_xml == 0:
+                return "Successfully deleted city", True
+            else:
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text, False
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "unknown error"
+
+    def delete_publisher(self, publisher_name):
+        sql = """
+              DECLARE @return_value int
+              EXEC @return_value = spDeletePublisher @publisher_name =?
+              SELECT @return_value as 'Return Value'
+              """
+        crsr = self.conn.cursor()
+        params = (publisher_name,)
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if str_xml == 0:
+                return "successfully deleted publisher", True
+            else:
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text, False
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
+
+    def get_publications(self):
+        sql = """
+            DECLARE @return_value int
+            EXEC getAllPublications
+            SELECT @return_value as 'Return Value'
+            """
+        crsr = self.conn.cursor()
+        crsr.execute(sql)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            tree = et.fromstring(str_xml)
+            if tree.tag == "publications":
+                pubs = {}
+                for child in tree.getchildren():
+                    for element in child:
+                        if element.tag == "ErrorMessage":
+                            return element.text
+            elif tree.tag == "errors":
+                for child in tree.getchildren():
+                    for element in child:
+                        if element.tag == "ErrorMessage":
+                            return element.text
+
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "Unknown error encountered"
