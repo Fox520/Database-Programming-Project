@@ -172,6 +172,11 @@ class NewPublicationScreen(Screen):
         self.volume = self.ids["volume"]
         self.conf_title = self.ids["conf_title"]
 
+        # dicts
+        self.author_dictionary = {}
+        self.city_dictionary = {}
+        self.publisher_dictionary = {}
+
     def on_enter(self, *args):
         self.setup_authors()
         self.setup_city()
@@ -282,6 +287,23 @@ class NewPublicationScreen(Screen):
                     "on_release": lambda x=name_item: self.chosen_author(x),
                 }
             )
+    def get_author_id_from_dict(self, name):
+        try:
+            return self.author_dictionary[name]
+        except:
+            return -1
+
+    def get_publisher_id_from_dict(self, name):
+        try:
+            return self.publisher_dictionary[name]
+        except:
+            return -1
+
+    def get_city_id_from_dict(self, name):
+        try:
+            return self.city_dictionary[name]
+        except:
+            return -1
 
     def chosen_author(self, x):
         # self.main_button_author.text = x
@@ -299,8 +321,64 @@ class NewPublicationScreen(Screen):
 
         self.instance_menu_authors.dismiss()
 
-    def submit(self):
-        toast("TODO")
+    def submit(self, pub_type, authors, publisher, book_title, edition, journal_title, volume, conf_title, city, dop,
+               file_path, abstract):
+        count = 0
+        authors_split = authors.split(",")
+        bk_id = None
+        journal_id = None
+        conf_id = None
+        can_proceed = [False, "cannot continue adding"]
+        publication_id = "unknown error"
+        for author_name in authors_split:
+            if count > 0:
+                output = database_interface.add_author_publication_junction(self.get_author_id_from_dict(author_name),
+                                                                            publication_id)
+                print(output)
+                continue
+            count = count + 1
+            if pub_type.lower() == "book":
+                bk_id = database_interface.add_book(book_title, edition)
+                if isinstance(bk_id, int):
+                    can_proceed = [True, "book"]
+                else:
+                    toast(bk_id)
+            elif pub_type.lower() == "conference proceedings":
+                conf_id = database_interface.add_conf_proceeding(conf_title)
+                if isinstance(conf_id, int):
+                    can_proceed = [True, "conf"]
+                else:
+                    toast(conf_id)
+            elif pub_type.lower() == "journal":
+                journal_id = database_interface.add_journal(journal_title, volume)
+                if isinstance(journal_id, int):
+                    can_proceed = [True, "journal"]
+                else:
+                    toast(journal_id)
+            if can_proceed[0]:
+
+                if can_proceed[1] == "book":
+                    publication_id = database_interface.add_publication(book_id=bk_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                elif can_proceed[1] == "conf":
+                    publication_id = database_interface.add_publication(book_id=conf_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                elif can_proceed[1] == "journal":
+                    publication_id = database_interface.add_publication(book_id=journal_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                # print("publication id:", publication_id)
+                # print("before converting:", type(publication_id))
+                # publication_id = int(publication_id)
+                # print("after converting:", type(publication_id))
+                if publication_id is not None:
+                    print("before junction:", publication_id)
+                    publication_id = publication_id
+                    output = database_interface.add_author_publication_junction(self.get_author_id_from_dict(author_name), publication_id)
+                    toast(output)
+                else:
+                    print("publication id is none")
+            else:
+                print(can_proceed[1])
+                # toast(can_proceed[1])
+
+
 
     def set_date_of_publication(self, date_obj):
         self.date_of_publication.text = str(date_obj)
@@ -414,11 +492,21 @@ class GeneralPublicationOptions(Screen):
         self.instance_menu_city = None
         self.menu_for_ct = []
 
+    def on_enter(self, *args):
+        self.setup_publisher()
+        self.setup_city()
+
     def setup_publisher(self):
-        pass
+        self.publisher_dictionary = database_interface.get_publishers()
+        if len(self.publisher_dictionary) > 0:
+            for k, v in self.publisher_dictionary.items():
+                self.menu_for_publisher.append(k)
 
     def setup_city(self):
-        pass
+        self.city_dictionary = database_interface.get_cities()
+        if len(self.city_dictionary) > 0:
+            for k, v in self.city_dictionary.items():
+                self.menu_for_city.append(k)
 
     def set_menu_for_publisher(self, action):
         # reset menu_for_author_titles and get from db
@@ -436,7 +524,16 @@ class GeneralPublicationOptions(Screen):
 
     def chosen_publisher(self, x, action):
         print(x, action)
+        if action == "update":
+            dialog = MDInputDialog(
+                title='Rename'+ x, size_hint=(.4, .4),
+                text_button_ok="confirm",
+                events_callback=self.callback_rename)
+            dialog.open()
         self.instance_menu_publisher.dismiss()
+
+    def callback_rename(self, *args):
+        database_interface.update_publisher(args[1].text_field.text)
 
     def set_menu_for_city(self, action):
         if len(self.menu_for_city) < 1:

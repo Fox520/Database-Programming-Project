@@ -10,7 +10,8 @@ class SqlInterface:
     def __init__(self):
         self.conn = pyodbc.connect('DSN=projectile;'
                                    'Trusted_Connection=yes;'
-                                   'Database=SchoolProject;')
+                                   'Database=SchoolProject;',
+                                   autocommit=False)
 
     def add_title(self, t):
         sql = """
@@ -219,3 +220,183 @@ class SqlInterface:
             if DEBUG:
                 print(traceback.format_exc())
             return "unknown error"
+
+    def add_book(self, book_title, edition):
+        # https://github.com/mkleehammer/pyodbc/wiki/Calling-Stored-Procedures
+        sql = """
+            DECLARE @return_value int
+            EXEC spAddBook @book_title=?, @edition=?, @bk_id = @return_value OUTPUT
+            SELECT @return_value as 'Return Value'
+            """
+        params = (book_title, edition)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if isinstance(str_xml, int):
+                print("Successfully added author")
+                return str_xml
+            else:
+                tree = et.fromstring(str_xml)
+                # print(tree.tag)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text
+        except Exception as e:
+            print(e)
+
+    def add_journal(self, journal_title, volume):
+        sql = """
+            DECLARE @return_value int
+            EXEC spAddJournal @journal_title=?, @volume=?, @journ_id = @return_value OUTPUT
+            SELECT @return_value as 'Return Value'
+            """
+        params = (journal_title, volume)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if isinstance(str_xml, int):
+                return str_xml
+            else:
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text
+        except Exception as e:
+            print(e)
+
+    def add_conf_proceeding(self, conf_title):
+        sql = """
+            DECLARE @return_value int
+            EXEC spAddConferenceProceedings @conf_proceedings_title=?, @conf_id= @return_value OUTPUT
+            SELECT @return_value as 'Return Value'
+            """
+        params = (conf_title,)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if isinstance(str_xml, int):
+                return str_xml
+            else:
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text
+        except Exception as e:
+            print(e)
+
+    def add_publication(self, book_id=None, journal_id=None, conf_id=None, city_id=None, publisher_id=None, date_of_pub=None, abstract=None, file_path=None):
+        sql = """
+            DECLARE @return_value int 
+            EXEC spAddPublication @book_id=?, @journal_id=?, @conference_proceedings_id=?, @publisher_id=?,
+            @date_of_publication=?, @abstract=?, @city_id=?, @file_path=?
+            SELECT @return_value as 'Return Value'
+            """
+        sql2 = """
+                DECLARE @return_value int 
+                EXEC spAddPublication @book_id=?, @journal_id=?, @conference_proceedings_id=?, @publisher_id=?,
+                @date_of_publication=?, @abstract=?, @city_id=?
+                SELECT @return_value as 'Return Value'
+                """
+        if file_path == "":
+            params = (book_id, journal_id, conf_id, publisher_id, date_of_pub, abstract, city_id)
+            sql = sql2
+        else:
+            params = (book_id, journal_id, conf_id, publisher_id, date_of_pub, abstract, city_id, file_path)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        print(rows)
+        # https://github.com/mkleehammer/pyodbc/issues/424
+        self.conn.commit()
+        try:
+            str_xml = rows[0][0]
+        except:
+            return rows[0]
+        try:
+            try:
+                str_xml.decode()
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text
+
+            except:
+                print(str_xml)
+                print("returning  ...")
+                return str_xml
+
+        except Exception as e:
+            traceback.format_exc()
+
+    def add_author_publication_junction(self, author_id, publication_id):
+        sql = """
+            DECLARE @return_value int
+            EXEC spCombineAuthorPublicationJunction @author_id=?, @publication_id=?
+            SELECT @return_value as 'Return Value'
+            """
+        params = (author_id, publication_id)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        # print(rows)
+        str_xml = rows[0][0]
+        # print("at junction:", str_xml)
+        try:
+            if str_xml is None:
+                return "successfully added publication"
+            else:
+                tree = et.fromstring(str_xml)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text
+        except Exception as e:
+            print(e)
+
+    def update_publisher(self, new_name):
+        sql = """
+                    DECLARE @return_value int
+                    EXEC spUpdatePublisher @publisher_name=?
+                    SELECT @return_value as 'Return Value'
+                    """
+        params = (new_name,)
+        crsr = self.conn.cursor()
+        crsr.execute(sql, params)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        try:
+            if isinstance(str_xml, int):
+                print("Successfully updated publisher")
+                return str_xml
+            else:
+                tree = et.fromstring(str_xml)
+                # print(tree.tag)
+                if tree.tag == "errors":
+                    for child in tree.getchildren():
+                        for element in child:
+                            if element.tag == "ErrorMessage":
+                                return element.text
+        except Exception as e:
+            print(e)
+
+        #spUpdateCity

@@ -449,7 +449,6 @@ BEGIN
 		insert into PUBLICATION(book_id, journal_id, conference_proceedings_id, city_id, publisher_id, file_path_id, date_of_publication, abstract)
 		values(@book_id, @journal_id, @conference_proceedings_id, @city_id, @publisher_id, @file_path_id, @date_of_publication, @abstract)
 		SELECT SCOPE_IDENTITY()
-		FOR XML RAW('publication_id'), ROOT('publication_ids'), ELEMENTS
 	END TRY
 	BEGIN CATCH
 		SELECT
@@ -468,18 +467,19 @@ CREATE PROCEDURE spCombineAuthorPublicationJunction
 @publication_id INT
 AS
 BEGIN
+	SET NOCOUNT ON;
 	BEGIN TRY
 		IF @publication_id IS NULL OR @publication_id  = '' OR @author_id IS NULL OR @author_id = ''
 		BEGIN
 			;THROW 99001, 'Provide all information', 1;
 			RETURN
 		END
-		IF EXISTS(SELECT publication_id FROM PUBLICATION WHERE publication_id = @publication_id)
+		IF NOT EXISTS(SELECT publication_id FROM PUBLICATION WHERE publication_id = @publication_id)
 		BEGIN
 			;THROW 99001, 'Publication not found', 1;
 			RETURN
 		END
-		IF EXISTS(SELECT author_id FROM AUTHOR WHERE author_id = @author_id)
+		IF NOT EXISTS(SELECT author_id FROM AUTHOR WHERE author_id = @author_id)
 		BEGIN
 			;THROW 99001, 'Author not found', 1;
 			RETURN

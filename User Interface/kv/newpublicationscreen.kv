@@ -104,8 +104,9 @@
                 id: custom_upload
                 hint_text: "file path (optional)"
             TextInput:
+                id: abstract
                 hint_text: "Abstract"
             Button:
                 text: "submit"
                 on_release:
-                    root.submit()
+                    root.submit(pub_type=main_button_publication.text, authors=custom_authors.text, publisher=custom_publisher.text, book_title=book_title.text, edition=edition.text, journal_title=journal_title.text, volume=volume.text, conf_title=conf_title.text, city=custom_city.text, dop=date_of_publication.text, file_path=custom_upload.text, abstract=abstract.text)
