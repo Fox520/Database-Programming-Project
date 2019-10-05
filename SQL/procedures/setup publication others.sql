@@ -65,7 +65,8 @@ END
 
 GO
 CREATE PROCEDURE spUpdateCity
-@city_name VARCHAR(50)
+@city_name VARCHAR(50),
+@old_city_name VARCHAR(50)
 AS
 BEGIN
 	SET NOCOUNT ON
@@ -87,7 +88,7 @@ BEGIN
 		END
 		UPDATE CITY
 		SET city_name = @city_name
-		WHERE city_name = @city_name
+		WHERE city_name = @old_city_name
 	END TRY
 	BEGIN CATCH
 		SELECT
@@ -103,7 +104,8 @@ END
 
 GO
 CREATE PROCEDURE spUpdatePublisher
-@publisher_name VARCHAR(50)
+@publisher_name VARCHAR(50),
+@old_publisher_name VARCHAR(50)
 AS
 BEGIN
 	SET NOCOUNT ON
@@ -125,7 +127,7 @@ BEGIN
 		END
 		UPDATE PUBLISHER
 		SET publisher_name = @publisher_name
-		WHERE publisher_name = @publisher_name
+		WHERE publisher_name = @old_publisher_name
 	END TRY
 	BEGIN CATCH
 		SELECT
