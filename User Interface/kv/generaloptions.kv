@@ -91,9 +91,9 @@
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
-                    text: "Update an existing publisher name"
+                    text: "Rename existing publisher"
                     on_release:
-                        root.set_menu_for_publisher("update")
+                        root.set_menu("update", "publisher")
                         root.instance_menu_publisher = MDDropdownMenu(\
                         items=root.menu_for_pb, \
                         max_height=dp(260), width_mult=4)
@@ -102,9 +102,9 @@
                 transitions: {'pos': 'out_quad', 'size': 'in_expo'}
                 duration: 1
                 Button:
-                    text: "Update existing city name"
+                    text: "Rename city"
                     on_release:
-                        root.set_menu_for_city("update")
+                        root.set_menu("update", "city")
                         root.instance_menu_city = MDDropdownMenu(\
                         items=root.menu_for_ct, \
                         max_height=dp(260), width_mult=4)
@@ -115,7 +115,7 @@
                 Button:
                     text: "Delete existing city"
                     on_release:
-                        root.set_menu_for_city("delete")
+                        root.set_menu("delete", "city")
                         root.instance_menu_city = MDDropdownMenu(\
                         items=root.menu_for_ct, \
                         max_height=dp(260), width_mult=4)
@@ -126,7 +126,7 @@
                 Button:
                     text: "Delete a publisher"
                     on_release:
-                        root.set_menu_for_publisher("delete")
+                        root.set_menu("delete", "publisher")
                         root.instance_menu_publisher = MDDropdownMenu(\
                         items=root.menu_for_pb, \
                         max_height=dp(260), width_mult=4)
