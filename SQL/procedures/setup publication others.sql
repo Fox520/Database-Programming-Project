@@ -76,7 +76,7 @@ BEGIN
 			;THROW 99001, 'Provide city name', 1;
 			RETURN
 		END
-		IF NOT EXISTS(SELECT city_name FROM CITY WHERE city_name = @city_name)
+		IF NOT EXISTS(SELECT city_name FROM CITY WHERE city_name = @old_city_name)
 		BEGIN
 			;THROW 99001, 'City does not exist', 1;
 			RETURN
@@ -115,7 +115,7 @@ BEGIN
 			;THROW 99001, 'Provide a publisher name', 1;
 			RETURN
 		END
-		IF NOT EXISTS(SELECT publisher_name FROM PUBLISHER WHERE publisher_name = @publisher_name)
+		IF NOT EXISTS(SELECT publisher_name FROM PUBLISHER WHERE publisher_name = @old_publisher_name)
 		BEGIN
 			;THROW 99001, 'Publisher does not exist', 1;
 			RETURN
@@ -200,8 +200,8 @@ BEGIN
 			;THROW 99001, 'Only letters allowed for city name', 1;
 			RETURN
 		END
-		DELETE FROM PUBLISHER
-		WHERE publisher_name = @city_name
+		DELETE FROM CITY
+		WHERE city_name = @city_name
 	END TRY
 	BEGIN CATCH
 		SELECT
