@@ -365,12 +365,12 @@ class NewPublicationScreen(Screen):
         can_proceed = [False, "cannot continue adding"]
         publication_id = "unknown error"
         for author_name in authors_split:
-            if count > 0:
+            if count > 0 and isinstance(publication_id, int):
                 output = database_interface.add_author_publication_junction(self.get_author_id_from_dict(author_name),
                                                                             publication_id)
                 print(output)
                 continue
-            count = count + 1
+
             if pub_type.lower() == "book":
                 bk_id = database_interface.add_book(book_title, edition)
                 if isinstance(bk_id, int):
@@ -411,6 +411,7 @@ class NewPublicationScreen(Screen):
                                                                         abstract=abstract, file_path=file_path)
 
                 if publication_id is not None:
+                    count = count + 1
                     output = database_interface.add_author_publication_junction(
                         self.get_author_id_from_dict(author_name), publication_id)
                     print(output)
@@ -419,6 +420,8 @@ class NewPublicationScreen(Screen):
                     print("publication id is none")
             else:
                 print(can_proceed[1])
+
+        # reset
 
     def set_date_of_publication(self, date_obj):
         self.date_of_publication.text = str(date_obj)

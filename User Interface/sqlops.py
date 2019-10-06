@@ -152,6 +152,18 @@ class SqlInterface:
             title_dict[pair[1]] = pair[0]
         return title_dict
 
+    def get_all_publications(self):
+        pass
+
+    def get_publications_for_publisher(self, publisher_id):
+        pass
+
+    def get_publications_by_author(self, author_id):
+        pass
+
+    def get_publications_for_city(self, city_id):
+        pass
+
     def get_cities(self):
         sql = """
                 select * from city
@@ -354,7 +366,7 @@ class SqlInterface:
             EXEC spCombineAuthorPublicationJunction @author_id=?, @publication_id=?
             SELECT @return_value as 'Return Value'
             """
-        params = (author_id, publication_id)
+        params = (int(author_id), int(publication_id))
         crsr = self.conn.cursor()
         crsr.execute(sql, params)
         rows = crsr.fetchall()
