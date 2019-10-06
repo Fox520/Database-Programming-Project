@@ -1,6 +1,4 @@
-# TODO: create a stored procedure to get the publication id
-#       since now SCOPE_IDENTITY is unreliable
-#       later work on getting and listing the publications
+# TODO: work on getting and listing the publications
 
 # -*- coding: utf-8 -*-
 # encoding=utf-8
@@ -400,18 +398,13 @@ class NewPublicationScreen(Screen):
                     publication_id = database_interface.add_publication(journal_id=journal_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
 
                 if publication_id is not None:
-                    #publication_id = publication_id
-                    print(publication_id)
                     output = database_interface.add_author_publication_junction(self.get_author_id_from_dict(author_name), publication_id)
-                    toast(output)
                     print(output)
+                    toast(output)
                 else:
                     print("publication id is none")
             else:
                 print(can_proceed[1])
-                # toast(can_proceed[1])
-
-
 
     def set_date_of_publication(self, date_obj):
         self.date_of_publication.text = str(date_obj)

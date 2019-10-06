@@ -450,7 +450,14 @@ BEGIN
 		END
 		insert into PUBLICATION(book_id, journal_id, conference_proceedings_id, city_id, publisher_id, file_path_id, date_of_publication, abstract)
 		values(@book_id, @journal_id, @conference_proceedings_id, @city_id, @publisher_id, @file_path_id, @date_of_publication, @abstract)
-		SELECT SCOPE_IDENTITY()
+		
+		DECLARE @out_id INT;
+		EXEC spInternalGetPublicationID
+			@book_id = @book_id,
+			@journal_id = @journal_id,
+			@conf_id = @conference_proceedings_id,
+			@out_id = @out_id OUTPUT;
+		SELECT @out_id
 	END TRY
 	BEGIN CATCH
 		SELECT
@@ -462,6 +469,38 @@ BEGIN
 			ERROR_MESSAGE() AS ErrorMessage
 		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
 	END CATCH;
+END
+GO
+CREATE PROCEDURE spInternalGetPublicationID
+@book_id INT = NULL,
+@journal_id INT = NULL,
+@conf_id INT = NULL,
+@out_id INT OUTPUT
+AS
+BEGIN
+	BEGIN TRY
+		IF @book_id IS NULL AND @journal_id IS NULL AND @conf_id IS NULL
+		BEGIN
+			;THROW 99001, 'No id supplied', 1;
+			RETURN
+		END
+		IF @book_id IS NOT NULL
+			SELECT @out_id = publication_id from PUBLICATION WHERE book_id = @book_id
+		ELSE IF @journal_id IS NOT NULL
+			SELECT @out_id = publication_id from PUBLICATION WHERE book_id = @journal_id
+		ELSE IF @conf_id IS NOT NULL
+			SELECT @out_id = publication_id from PUBLICATION WHERE conference_proceedings_id = @conf_id
+	END TRY
+	BEGIN CATCH
+		SELECT
+			ERROR_NUMBER() AS ErrorNumber,
+			ERROR_STATE() AS ErrorState,
+			ERROR_SEVERITY() AS ErrorSeverity,
+			ERROR_PROCEDURE() AS ErrorProcedure,
+			ERROR_LINE() AS ErrorLine,
+			ERROR_MESSAGE() AS ErrorMessage
+		FOR XML RAW('error'), ROOT('errors'), ELEMENTS
+	END CATCH
 END
 GO
 CREATE PROCEDURE spCombineAuthorPublicationJunction
