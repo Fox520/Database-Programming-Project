@@ -107,7 +107,7 @@ class SqlInterface:
 
         title_dict = {}
         for pair in rows:
-            title_dict[pair[3]+" "+pair[4]] = pair[0]
+            title_dict[pair[3] + " " + pair[4]] = pair[0]
         return title_dict
 
     def get_titles(self):
@@ -302,7 +302,8 @@ class SqlInterface:
                 print(traceback.format_exc())
             return "Unknown error encountered"
 
-    def add_publication(self, book_id=None, journal_id=None, conf_id=None, city_id=None, publisher_id=None, date_of_pub=None, abstract=None, file_path=None):
+    def add_publication(self, book_id=None, journal_id=None, conf_id=None, city_id=None, publisher_id=None,
+                        date_of_pub=None, abstract=None, file_path=None):
         sql = """
             DECLARE @return_value int 
             EXEC spAddPublication @book_id=?, @journal_id=?, @conference_proceedings_id=?, @publisher_id=?,

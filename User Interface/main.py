@@ -35,6 +35,7 @@ database_interface = SqlInterface()
 
 credentials = {"admin": "123"}
 
+
 def initialize_fonts():
     kivy_fonts = [
         {
@@ -391,14 +392,27 @@ class NewPublicationScreen(Screen):
             if can_proceed[0]:
 
                 if can_proceed[1] == "book":
-                    publication_id = database_interface.add_publication(book_id=bk_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                    publication_id = database_interface.add_publication(book_id=bk_id,
+                                                                        city_id=self.get_city_id_from_dict(city),
+                                                                        publisher_id=self.get_publisher_id_from_dict(
+                                                                            publisher), date_of_pub=dop,
+                                                                        abstract=abstract, file_path=file_path)
                 elif can_proceed[1] == "conf":
-                    publication_id = database_interface.add_publication(conf_id=conf_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                    publication_id = database_interface.add_publication(conf_id=conf_id,
+                                                                        city_id=self.get_city_id_from_dict(city),
+                                                                        publisher_id=self.get_publisher_id_from_dict(
+                                                                            publisher), date_of_pub=dop,
+                                                                        abstract=abstract, file_path=file_path)
                 elif can_proceed[1] == "journal":
-                    publication_id = database_interface.add_publication(journal_id=journal_id, city_id=self.get_city_id_from_dict(city), publisher_id=self.get_publisher_id_from_dict(publisher), date_of_pub=dop, abstract=abstract, file_path=file_path)
+                    publication_id = database_interface.add_publication(journal_id=journal_id,
+                                                                        city_id=self.get_city_id_from_dict(city),
+                                                                        publisher_id=self.get_publisher_id_from_dict(
+                                                                            publisher), date_of_pub=dop,
+                                                                        abstract=abstract, file_path=file_path)
 
                 if publication_id is not None:
-                    output = database_interface.add_author_publication_junction(self.get_author_id_from_dict(author_name), publication_id)
+                    output = database_interface.add_author_publication_junction(
+                        self.get_author_id_from_dict(author_name), publication_id)
                     print(output)
                     toast(output)
                 else:
