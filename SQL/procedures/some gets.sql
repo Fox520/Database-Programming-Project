@@ -41,24 +41,21 @@ BEGIN
 		CITY.city_name,
 		FILES.file_path,
 		PUBLISHER.publisher_name,
-		BOOK.book_id,
 		BOOK.book_title,
 		BOOK.edition,
-		CONF.conference_proceedings_id,
 		CONF.conference_proceedings_title,
-		JOURNAL.journal_id,
 		JOURNAL.journal_title,
 		JOURNAL.volume,
 		PUBLICATION.abstract,
 		PUBLICATION.date_of_publication
 
 	FROM Publication
-	JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
-	JOIN CITY ON PUBLICATION.city_id = CITY.city_id
-	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
-	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
-	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
-	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
+	FULL JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
+	FULL JOIN CITY ON PUBLICATION.city_id = CITY.city_id
+	FULL JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
+	FULL JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
+	FULL JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
+	FULL JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
 
 	FOR XML RAW('publication'), ROOT('publications'), ELEMENTS
 END
@@ -162,24 +159,21 @@ BEGIN
 		CITY.city_name,
 		FILES.file_path,
 		PUBLISHER.publisher_name,
-		BOOK.book_id,
 		BOOK.book_title,
 		BOOK.edition,
-		CONF.conference_proceedings_id,
 		CONF.conference_proceedings_title,
-		JOURNAL.journal_id,
 		JOURNAL.journal_title,
 		JOURNAL.volume,
 		PUBLICATION.abstract,
 		PUBLICATION.date_of_publication
 
 	FROM Publication
-	JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
-	JOIN CITY ON PUBLICATION.city_id = CITY.city_id
-	JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
-	JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
-	JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
-	JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
+	FULL JOIN PUBLISHER ON PUBLICATION.publisher_id = PUBLISHER.publisher_id
+	FULL JOIN CITY ON PUBLICATION.city_id = CITY.city_id
+	FULL JOIN FILES ON PUBLICATION.file_path_id = FILES.file_path_id
+	FULL JOIN JOURNAL ON PUBLICATION.journal_id = JOURNAL.journal_id
+	FULL JOIN BOOK ON PUBLICATION.book_id = BOOK.book_id
+	FULL JOIN CONFERENCE_PROCEEDING CONF ON PUBLICATION.conference_proceedings_id = CONF.conference_proceedings_id
 	WHERE PUBLISHER.publisher_id = @publisher_id
 
 	FOR XML RAW('publication_publisher'), ROOT('publication_publishers'), ELEMENTS
