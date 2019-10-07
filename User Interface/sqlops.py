@@ -153,7 +153,53 @@ class SqlInterface:
         return title_dict
 
     def get_all_publications(self):
-        pass
+        sql = """
+                DECLARE @return_value int
+                EXEC @return_value = getAllPublications
+                SELECT @return_value as 'Return Value'
+                """
+        crsr = self.conn.cursor()
+        crsr.execute(sql)
+        rows = crsr.fetchall()
+        self.conn.commit()
+        str_xml = rows[0][0]
+        output_list = []
+        try:
+            tree = et.fromstring(str_xml)
+            if tree.tag == "publications":
+                for child in tree.getchildren():
+                    return_dict = {}
+                    for element in child:
+                        if element.tag == "publication_id":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "city_name":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "publisher_name":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "book_title":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "edition":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "abstract":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "date_of_publication":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "conference_proceedings_title":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "journal_title":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "volume":
+                            return_dict[element.tag] = element.text
+                        if element.tag == "file_path":
+                            return_dict[element.tag] = element.text
+                    output_list.append(return_dict)
+            else:
+                return None
+            return output_list
+        except:
+            if DEBUG:
+                print(traceback.format_exc())
+            return "unknown error"
 
     def get_publications_for_publisher(self, publisher_id):
         pass
