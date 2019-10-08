@@ -530,7 +530,7 @@ class ListPublicationScreen(Screen):
                         "publisher_name": "Publisher: " + publisher_name,
                         "publication_date": "Date of publication: " + str(date_of_pub), "city": "City: " + city_name,
                         "file_path": file_path if file_path is not None else "",
-                        "author_names": "Authors: "+author_names,
+                        "author_names": "Authors: " + author_names,
                         "abstract": "Abstract: " + abstract[:50] + "..." if abstract != "" else ""}
 
         if publication_type == "book":
@@ -549,8 +549,6 @@ class ListPublicationScreen(Screen):
             dict_of_data["conf_title"] = "Title: " + conf_title
 
         self.publications_data.append(dict_of_data)
-        print(dict_of_data)
-        print("_"*20)
 
     def on_back_pressed(self):
         UserInterface().change_screen("home_screen")
@@ -786,7 +784,6 @@ class UserInterface(App):
                 else:
                     sm.add_widget(scns[screen_name](name=screen_name))
                     print(screen_name + " added")
-                    # print("Screen ["+screen_name+"] added")
         except:
             print(traceback.format_exc())
 
@@ -794,8 +791,7 @@ class UserInterface(App):
         global sm
         self.bind(on_start=self.post_build_init)
         sm = ScreenManager(transition=SwapTransition())
-        # sm.add_widget(LoginScreen(name="login_screen"))
-        sm.add_widget(ListPublicationScreen(name="list_publication_screen"))
+        sm.add_widget(LoginScreen(name="login_screen"))
         return sm
 
     def post_build_init(self, ev):
