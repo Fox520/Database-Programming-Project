@@ -1,11 +1,13 @@
-# TODO: work on getting and listing the publications
+# TODO: Display a selected publication
 
 # -*- coding: utf-8 -*-
 # encoding=utf-8
 import functools
 import os
+import threading
 import traceback
 
+from kivy.clock import mainthread
 from kivy.core.text import LabelBase
 from kivy.uix.popup import Popup
 
@@ -34,6 +36,9 @@ Config.set('graphics', 'multisamples', '0')
 database_interface = SqlInterface()
 
 credentials = {"admin": "123"}
+CONFERENCE_IMG = "resources/conference_img.png"
+BOOK_IMG = "resources/book_img.png"
+JOURNAL_IMG = "resources/journal_img.png"
 
 
 def initialize_fonts():
@@ -65,7 +70,7 @@ Builder.load_string("""
 
 class ItemList(MDCard):
     def prepare_viewing_of_publication(self):
-        print(self.publication_id)
+        print(int(self.publication_id))
 
 
 class LoginScreen(Screen):
@@ -467,24 +472,85 @@ class ListPublicationScreen(Screen):
         super(ListPublicationScreen, self).__init__(**kwargs)
 
     def on_enter(self, *args):
-        for i in range(4):
-            self.add_publication(f"publication type {i}", f"author names: {i}", f"edition {i}", f"volume {i}",
-                                 f"city {i}", f"publisher {i}")
+        threading.Thread(target=self.initiate_retrieval).start()
 
-    def add_publication(self, publication_type_string="", author_names_string="", edition_string="", volume_string="",
-                        city_string="", publisher_string=""):
-        self.publications_data.append(
-            {
-                "height": dp(180),
-                "publication_type_string": publication_type_string,
-                "author_names_string": author_names_string,
-                "edition_string": edition_string,
-                "volume_string": volume_string,
-                "city_string": city_string,
-                "publisher_string": publisher_string,
-                "publication_id": 0
-            }
-        )
+    def initiate_retrieval(self):
+        all_pubs = database_interface.get_all_publications()
+
+        for p in all_pubs:
+            # Get the common fields
+            dop = p.get("date_of_publication")
+            file_path = p.get("file_path")
+            publisher_name = p.get("publisher_name")
+            abstract = p.get("abstract")
+            city_name = p.get("city_name")
+            publication_id = p.get("publication_id")
+
+            # determine type (book/journal/conference)
+            pub_type = None
+
+            if p.get("book_title") is not None:
+                pub_type = "book"
+            elif p.get("journal_title") is not None:
+                pub_type = "journal"
+            elif p.get("conference_proceedings_title") is not None:
+                pub_type = "conf"
+
+            if pub_type == "book":
+                # get fields relating to book
+                bk_title = p.get("book_title")
+                edition = p.get("edition")
+                self.add_publication(publication_type="book", author_names="TODO...",
+                                     edition=edition, book_title=bk_title, date_of_pub=dop,
+                                     publication_id=publication_id, abstract=abstract, file_path=file_path,
+                                     publisher_name=publisher_name, city_name=city_name)
+                continue
+            elif pub_type == "journal":
+                j_title = p.get("journal_title")
+                vol = p.get("volume")
+                self.add_publication(publication_type="journal", author_names="TODO...",
+                                     journal_title=j_title, volume=vol, date_of_pub=dop,
+                                     publication_id=publication_id, abstract=abstract, file_path=file_path,
+                                     publisher_name=publisher_name, city_name=city_name)
+                continue
+            elif pub_type == "conf":
+                conf_title = p.get("conference_proceedings_title")
+                self.add_publication(publication_type="conf", author_names="TODO...",
+                                     conf_title=conf_title, date_of_pub=dop,
+                                     publication_id=publication_id, abstract=abstract, file_path=file_path,
+                                     publisher_name=publisher_name, city_name=city_name)
+                continue
+
+    # @mainthread
+    def add_publication(self, publication_type="", author_names="", edition="", volume="",
+                        city_name="", publisher_name="", book_title="", date_of_pub="", publication_id="",
+                        abstract="", file_path="", journal_title="", conf_title=""):
+
+        dict_of_data = {"height": dp(200), "publication_id": publication_id,
+                        "publisher_name": "Publisher: " + publisher_name,
+                        "publication_date": "Date of publication: " + str(date_of_pub), "city": "City: " + city_name,
+                        "file_path": file_path if file_path is not None else "",
+                        "author_names": "Authors: "+author_names,
+                        "abstract": "Abstract: " + abstract[:50] + "..." if abstract != "" else ""}
+
+        if publication_type == "book":
+            dict_of_data["img_src"] = BOOK_IMG
+            dict_of_data["publication_type"] = "Publication type: Book"
+            dict_of_data["book_title"] = "Title: " + book_title
+            dict_of_data["edition"] = "Edition: " + edition
+        elif publication_type == "journal":
+            dict_of_data["img_src"] = JOURNAL_IMG
+            dict_of_data["publication_type"] = "Publication type: Journal"
+            dict_of_data["journal_title"] = "Title: " + journal_title
+            dict_of_data["volume"] = "Volume: " + volume
+        elif publication_type == "conf":
+            dict_of_data["img_src"] = CONFERENCE_IMG
+            dict_of_data["publication_type"] = "Publication type: Conference Proceeding"
+            dict_of_data["conf_title"] = "Title: " + conf_title
+
+        self.publications_data.append(dict_of_data)
+        print(dict_of_data)
+        print("_"*20)
 
     def on_back_pressed(self):
         UserInterface().change_screen("home_screen")
@@ -728,7 +794,8 @@ class UserInterface(App):
         global sm
         self.bind(on_start=self.post_build_init)
         sm = ScreenManager(transition=SwapTransition())
-        sm.add_widget(LoginScreen(name="login_screen"))
+        # sm.add_widget(LoginScreen(name="login_screen"))
+        sm.add_widget(ListPublicationScreen(name="list_publication_screen"))
         return sm
 
     def post_build_init(self, ev):

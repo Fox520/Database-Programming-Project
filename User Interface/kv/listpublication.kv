@@ -31,16 +31,23 @@
     elevation: 10
 
     publication_id: 0
-    publication_type_string: ""
-    author_names_string: ""
-    edition_string: ""
-    volume_string: ""
-    city_string: ""
-    publisher_string: ""
-    publication_date_string: ""
+    publication_type: ""
+    publisher_name: ""
+    publication_date: ""
+    author_names: ""
+    edition: ""
+    volume: ""
+    city: ""
+    conf_title: ""
+    abstract: ""
+    book_title: ""
+    journal_title: ""
+    file_path: ""
+    img_src: ""
+
 
     Image:
-        source: "resources/document_image.png"
+        source: root.img_src
         size_hint: None, None
         size: dp(48), dp(48)
         pos_hint: {"center_y": .5}
@@ -52,23 +59,30 @@
         size: self.minimum_size
 
         MyLabel:
-            text: root.publication_type_string
+            text: root.publication_type
         MyLabel:
-            text: root.author_names_string
+            text: root.book_title
+        MyLabel:
+            text: root.journal_title
+        MyLabel:
+            text: root.conf_title
+        MyLabel:
+            text: root.edition
+        MyLabel:
+            text: root.volume
+        MyLabel:
+            text: root.author_names
+        MyLabel:
+            text: root.publisher_name
 
         MyLabel:
-            text: root.edition_string
-        MyLabel:
-            text: root.volume_string
+            text: root.city
 
         MyLabel:
-            text: root.city_string
-
+            text: root.abstract
         MyLabel:
-            text: root.publisher_string
+            text: root.publication_date
 
-        MyLabel:
-            text: root.publication_date_string
 
     Widget:
 
